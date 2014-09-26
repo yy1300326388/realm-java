@@ -5,6 +5,12 @@ apply plugin: 'java'
 version = new File("${projectDir}/../version.txt").text
 group 'io.realm'
 
+tasks.withType(JavaCompile) { 
+    sourceCompatibility = "1.7"
+    targetCompatibility = "1.7" 
+}
+
+
 repositories {
     mavenCentral()
 }
@@ -26,11 +32,10 @@ jar {
     from configurations.compile.findAll {it.name.contains('javawriter')}.collect { zipTree(it) }
 }
 
-task(javadocJar, type: Jar, dependsOn: tasks["javadoc"]) {
+task(javadocJar, type: Jar) {
     group "Docs"
     description "Generates Javadoc in Jar format."
     classifier = 'javadoc'
-    from tasks["javadoc"].destinationDir
 }
 
 task(sourcesJar, type: Jar) {
