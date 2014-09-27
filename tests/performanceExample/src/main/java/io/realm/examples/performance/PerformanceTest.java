@@ -204,7 +204,9 @@ public abstract class PerformanceTest {
 
     public abstract void testQueries() throws PerformanceTestException;
 
-    public abstract void testInserts() throws PerformanceTestException;
+    public abstract void testInsertPerTransaction() throws PerformanceTestException;
+
+    public abstract void testBatchInserts() throws PerformanceTestException;
 
     public abstract void testCounts() throws PerformanceTestException;
 

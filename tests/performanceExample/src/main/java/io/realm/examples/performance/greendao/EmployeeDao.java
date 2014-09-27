@@ -56,7 +56,7 @@ public class EmployeeDao extends AbstractDao<Employee, Long> {
     @Override
     protected void bindValues(SQLiteStatement stmt, Employee entity) {
         stmt.clearBindings();
-
+ 
         Long id = entity.getId();
         if (id != null) {
             stmt.bindLong(1, id);

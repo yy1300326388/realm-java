@@ -1,16 +1,19 @@
 package io.realm.examples.performance.sugar_orm;
 
-import android.os.Looper;
+import android.util.Log;
 
 import com.orm.query.Condition;
 import com.orm.query.Select;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.realm.examples.performance.PerformanceTest;
 import io.realm.examples.performance.PerformanceTestException;
 
 public class SugarORMTests extends PerformanceTest {
+
+    public static final String TAG = SugarORMTests.class.getName();
 
     public SugarORMTests() {
         testName = "SugarORM";
@@ -31,7 +34,12 @@ public class SugarORMTests extends PerformanceTest {
         outcome.list().size();
     }
 
-    public void testInserts() throws PerformanceTestException {
+    public void testBatchInserts() throws PerformanceTestException {
+        //SugarORM Batch support has been deprecated and did not work when we tried it.
+        testInsertPerTransaction();
+    }
+
+    public void testInsertPerTransaction() throws PerformanceTestException {
         for (int row = 0; row < getNumInserts(); row++) {
             SugarEmployee employee
                     = new SugarEmployee(getEmployeeName(row),
@@ -42,7 +50,7 @@ public class SugarORMTests extends PerformanceTest {
 
         List<SugarEmployee> list = SugarEmployee.listAll(SugarEmployee.class);
         if(list.size() < getNumInserts()) {
-            throw new PerformanceTestException();
+            throw new PerformanceTestException("Sugar ORM failed to insert all of the records");
         }
     }
 

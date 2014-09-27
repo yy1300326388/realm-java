@@ -26,7 +26,30 @@ public class SQLiteTests extends PerformanceTest {
         databaseHelper.onCreate(db);
     }
 
-    public void testInserts() throws PerformanceTestException {
+    public void testInsertPerTransaction() throws PerformanceTestException {
+        ContentValues values = new ContentValues();
+        for (int row = 0; row < getNumInserts(); row++) {
+            db.beginTransaction();
+                values.put(databaseHelper.COLUMN_NAME, getEmployeeName(row));
+                values.put(databaseHelper.COLUMN_AGE, getEmployeeAge(row));
+                values.put(databaseHelper.COLUMN_HIRED, getEmployeeHiredStatus(row));
+                db.insert(databaseHelper.TABLE_EMPLOYEES, null, values);
+            db.setTransactionSuccessful();
+            db.endTransaction();
+        }
+
+        //Verify writes were successful
+        String query = "SELECT * FROM " + EmployeeDatabaseHelper.TABLE_EMPLOYEES;
+        Cursor cursor = db.rawQuery(query, null);
+
+        if(cursor.getCount() < getNumInserts()) {
+            throw new PerformanceTestException("SQLite failed to insert all of the records");
+        }
+
+        db.close();
+    }
+
+    public void testBatchInserts() throws PerformanceTestException {
         ContentValues values = new ContentValues();
         db.beginTransaction();
         for (int row = 0; row < getNumInserts(); row++) {
@@ -43,7 +66,7 @@ public class SQLiteTests extends PerformanceTest {
         Cursor cursor = db.rawQuery(query, null);
 
         if(cursor.getCount() < getNumInserts()) {
-            throw new PerformanceTestException();
+            throw new PerformanceTestException("SQLite failed to insert all of the records");
         }
 
         db.close();

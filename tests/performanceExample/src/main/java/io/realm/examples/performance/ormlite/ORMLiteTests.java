@@ -40,7 +40,34 @@ public class ORMLiteTests extends PerformanceTest {
         loopResults(rawResults);
     }
 
-    public void testInserts() throws PerformanceTestException {
+    public void testInsertPerTransaction() throws PerformanceTestException {
+
+        for (int row = 0; row < getNumInserts(); row++) {
+            final int index = row;
+            employeeDao.callBatchTasks(new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    OrmLiteEmployee employee = new OrmLiteEmployee();
+                    employee.setName(getEmployeeName(index));
+                    employee.setAge(getEmployeeAge(index));
+                    employee.setHired(getHiredBool(index));
+                    employeeDao.create(employee);
+                    return null;
+                }
+            });
+        }
+
+        //Verify writes were successful
+        GenericRawResults<String[]> rawResults =
+                employeeDao.queryRaw(
+                        "SELECT * from Employee");
+        //The actual verification was removed because in large data sizes
+        //sometimes there is a memory leak created.
+
+        helper.close();
+    }
+
+    public void testBatchInserts() throws PerformanceTestException {
         employeeDao.callBatchTasks(new Callable<Object>() {
             @Override
             public Object call() throws Exception {
@@ -62,7 +89,8 @@ public class ORMLiteTests extends PerformanceTest {
 
         helper.close();
 
-        //This was removed because in large data sizes sometimes there is a memory leak created.
+        //This verification was removed because in large data sizes
+        //sometimes there is a memory leak created.
         //        List<String[]> results = null;
         //        try {
         //            results = rawResults.getResults();

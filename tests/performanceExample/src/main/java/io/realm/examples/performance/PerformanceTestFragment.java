@@ -64,12 +64,14 @@ public abstract class PerformanceTestFragment extends Fragment {
                     try {
                         t.testBootstrap();
                         long startTime = System.currentTimeMillis();
-                        t.testInserts();
+                        t.testBatchInserts();
+                        //t.testInsertPerTransaction();
                         long duration = System.currentTimeMillis() - startTime;
                         publishProgress("Inserts: " + duration);
                         t.timings.put("Inserts", (t.getNumInserts() * 1.0 / duration));
                     } catch(PerformanceTestException e) {
-
+                        e.printStackTrace();
+                        continue;
                     }
 
                     try {
@@ -80,7 +82,8 @@ public abstract class PerformanceTestFragment extends Fragment {
                         publishProgress("Queries: " + duration);
                         t.timings.put("Queries", (t.getNumQueries() * 1.0 / duration));
                     } catch(PerformanceTestException e) {
-
+                        e.printStackTrace();
+                        continue;
                     }
 
                     try {
@@ -91,13 +94,15 @@ public abstract class PerformanceTestFragment extends Fragment {
                         publishProgress("Counts: " + duration);
                         t.timings.put("Counts", (t.getNumQueries() * 1.0 / duration));
                     } catch(PerformanceTestException e) {
-
+                        e.printStackTrace();
+                        continue;
                     }
 
 //                    try {
 //                        t.clearDatabase();
 //                    } catch (PerformanceTestException e) {
 //                        e.printStackTrace();
+//                        continue;
 //                    }
                 }
                 return null;
