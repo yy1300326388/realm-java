@@ -3,9 +3,11 @@ package io.realm.examples.performance.sqlite;
 import android.app.Activity;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteStatement;
 
 import io.realm.examples.performance.PerformanceTest;
 import io.realm.examples.performance.PerformanceTestException;
+import io.realm.examples.performance.greendao.Employee;
 
 public class SQLiteTests extends PerformanceTest {
 
@@ -50,16 +52,30 @@ public class SQLiteTests extends PerformanceTest {
     }
 
     public void testBatchInserts() throws PerformanceTestException {
-        ContentValues values = new ContentValues();
+        SQLiteStatement stmt = db.compileStatement("INSERT INTO "
+                + EmployeeDatabaseHelper.TABLE_EMPLOYEES + " VALUES(?1, ?2, ?3, ?4)");
+
         db.beginTransaction();
         for (int row = 0; row < getNumInserts(); row++) {
-            values.put(databaseHelper.COLUMN_NAME, getEmployeeName(row));
-            values.put(databaseHelper.COLUMN_AGE, getEmployeeAge(row));
-            values.put(databaseHelper.COLUMN_HIRED, getEmployeeHiredStatus(row));
-            db.insert(databaseHelper.TABLE_EMPLOYEES, null, values);
+            stmt.clearBindings();
+            stmt.bindString(2, getEmployeeName(row));
+            stmt.bindLong(3, getEmployeeAge(row));
+            stmt.bindLong(4, getEmployeeHiredStatus(row));
+            stmt.executeInsert();
         }
         db.setTransactionSuccessful();
         db.endTransaction();
+
+//        ContentValues values = new ContentValues();
+//        db.beginTransaction();
+//        for (int row = 0; row < getNumInserts(); row++) {
+//            values.put(databaseHelper.COLUMN_NAME, getEmployeeName(row));
+//            values.put(databaseHelper.COLUMN_AGE, getEmployeeAge(row));
+//            values.put(databaseHelper.COLUMN_HIRED, getEmployeeHiredStatus(row));
+//            db.insert(databaseHelper.TABLE_EMPLOYEES, null, values);
+//        }
+//        db.setTransactionSuccessful();
+//        db.endTransaction();
 
         //Verify writes were successful
         String query = "SELECT * FROM " + EmployeeDatabaseHelper.TABLE_EMPLOYEES;

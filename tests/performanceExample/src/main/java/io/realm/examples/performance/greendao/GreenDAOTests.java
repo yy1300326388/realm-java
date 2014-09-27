@@ -76,6 +76,8 @@ public class GreenDAOTests extends PerformanceTest {
     public void testBatchInserts() throws PerformanceTestException {
         EmployeeDao employeeDao = daoSession.getEmployeeDao();
         //To do batch on GreenDAO it is generally easier to use sqlite batch controls.
+        employeeDao.insertInTx();
+
         db.beginTransaction();
         try {
             for (int row = 0; row < 100000; row++) {
