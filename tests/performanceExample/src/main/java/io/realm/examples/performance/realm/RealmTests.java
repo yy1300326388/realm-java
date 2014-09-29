@@ -48,7 +48,9 @@ public class RealmTests extends PerformanceTest {
             employee.setHired(getEmployeeHiredStatus(row));
             realm.commitTransaction();
         }
+    }
 
+    public void verifyInserts() throws PerformanceTestException {
         //Verify writes were successful
         RealmResults<RealmEmployee> results = realm.where(RealmEmployee.class).findAll();
 
@@ -66,13 +68,6 @@ public class RealmTests extends PerformanceTest {
             employee.setHired(getEmployeeHiredStatus(row));
         }
         realm.commitTransaction();
-
-        //Verify writes were successful
-        RealmResults<RealmEmployee> results = realm.where(RealmEmployee.class).findAll();
-
-        if(results.size() < getNumInserts()) {
-            throw new PerformanceTestException("Realm failed to insert all of the records");
-        }
     }
 
     public void testQueries() throws PerformanceTestException {
@@ -102,9 +97,14 @@ public class RealmTests extends PerformanceTest {
         loopResults(results);
     }
 
-    private void loopResults(List<RealmEmployee> results) {
+    private void loopResults(List<RealmEmployee> results) throws PerformanceTestException{
+        int iterations = 0;
         for (RealmEmployee e : results) {
             e.getHired();
+            iterations++;
+        }
+        if(iterations < getNumInserts()) {
+            throw new PerformanceTestException("Realm does not complete the iterations over the queried results");
         }
     }
 

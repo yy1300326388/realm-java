@@ -15,6 +15,7 @@ public class GreenDAOTests extends PerformanceTest {
     private SQLiteDatabase db;
     private DaoMaster daoMaster;
     private DaoSession daoSession;
+    private EmployeeDao employeeDao;
 
     public GreenDAOTests() {
         testName = "GreenDAO";
@@ -36,37 +37,38 @@ public class GreenDAOTests extends PerformanceTest {
         db = helper.getWritableDatabase();
         daoMaster = new DaoMaster(db);
         daoSession = daoMaster.newSession();
-        EmployeeDao employeeDao = daoSession.getEmployeeDao();
+        employeeDao = daoSession.getEmployeeDao();
         employeeDao.createTable(db, true);
         Employee e = new Employee();
         employeeDao.insert(e);
         employeeDao.delete(e);
 
         //Skip the first as a "warmup"
-        String query = QUERY1;
-        Cursor cursor = db.rawQuery(query, null);
-        cursor.getCount();
-        cursor.close();
+        String query = "WHERE name = 'Foo0' " +
+                "AND age >= 20 AND age <= 50 " +
+                "AND hired = 0";
+        List<Employee> list = employeeDao.queryRaw(query, null);
+        list.size();
     }
 
     public void testInsertPerTransaction() throws PerformanceTestException {
         daoMaster = new DaoMaster(db);
         daoSession = daoMaster.newSession();
-        EmployeeDao employeeDao = daoSession.getEmployeeDao();
 
-        for(int row=0; row < getNumInserts(); row++) {
+        for (int row = 0; row < getNumInserts(); row++) {
             Employee employee = new Employee();
             employee.setName(getEmployeeName(row));
             employee.setAge(getEmployeeAge(row));
             employee.setHired(getHiredBool(row));
             employeeDao.insert(employee);
         }
+    }
 
-        Cursor cursor = db.query(employeeDao.getTablename(),
-                employeeDao.getAllColumns(), null, null, null, null, null);
-        cursor.getCount();
+    public void verifyInserts() throws PerformanceTestException {
+        //Verify writes were successful
+        List<Employee> list = employeeDao.loadAll();
 
-        if(cursor.getCount() < getNumInserts()) {
+        if(list.size() < getNumInserts()) {
             throw new PerformanceTestException("GreenDAO failed to insert all of the records");
         }
 
@@ -74,13 +76,11 @@ public class GreenDAOTests extends PerformanceTest {
     }
 
     public void testBatchInserts() throws PerformanceTestException {
-        EmployeeDao employeeDao = daoSession.getEmployeeDao();
         //To do batch on GreenDAO it is generally easier to use sqlite batch controls.
-        employeeDao.insertInTx();
 
         db.beginTransaction();
         try {
-            for (int row = 0; row < 100000; row++) {
+            for (int row = 0; row < getNumInserts(); row++) {
                 Employee employee = new Employee();
                 employee.setName(getEmployeeName(row));
                 employee.setAge(getEmployeeAge(row));
@@ -93,75 +93,76 @@ public class GreenDAOTests extends PerformanceTest {
         } finally {
             db.endTransaction();
         }
-
-        //Verify writes were successful
-        String query = "SELECT * FROM " + EmployeeDatabaseHelper.TABLE_EMPLOYEES;
-        Cursor cursor = db.rawQuery(query, null);
-
-        if(cursor.getCount() < getNumInserts()) {
-            throw new PerformanceTestException("GreenDAO failed to insert all of the records");
-        }
-
-        db.close();
     }
 
     public void testQueries() throws PerformanceTestException {
-        long startTime = System.currentTimeMillis();
         String query;
-        Cursor cursor;
 
-        query = QUERY2;
-        cursor = db.rawQuery(query, null);
-        loopCursor(cursor);
-        cursor.close();
+        query = "WHERE name = 'Foo1' " +
+                "AND age >= 20 AND age <= 50 " +
+                "AND hired = 1";
+        List<Employee> list = employeeDao.queryRaw(query, null);
+        loopResults(list);
 
-        query = QUERY3;
-        cursor = db.rawQuery(query, null);
-        loopCursor(cursor);
-        cursor.close();
+        query = "WHERE name = 'Foo3' " +
+                "AND age >= 20 AND age <= 50 " +
+                "AND hired = 1";
+        list = employeeDao.queryRaw(query, null);
+        loopResults(list);
 
-        query = QUERY4;
-        cursor = db.rawQuery(query, null);
-        loopCursor(cursor);
-        cursor.close();
+        query = "WHERE name = 'Foo2' " +
+                "AND age >= 20 AND age <= 50 " +
+                "AND hired = 0";
+        list = employeeDao.queryRaw(query, null);
+        loopResults(list);
 
-        query = QUERY5;
-        cursor = db.rawQuery(query, null);
-        loopCursor(cursor);
-        cursor.close();
+        query = "WHERE name = 'Foo330' " +
+                "AND age >= 20 AND age <= 50 " +
+                "AND hired = 0";
+        list = employeeDao.queryRaw(query, null);
+        loopResults(list);
+
         db.close();
     }
 
-    private void loopCursor(Cursor cursor) {
-        cursor.moveToFirst();
-        while (cursor.isAfterLast() == false) {
-            cursor.moveToNext();
+    private void loopResults(List<Employee> list) throws PerformanceTestException{
+        int iterations = 0;
+        for(Employee e : list) {
+            e.getHired();
+            iterations++;
+        }
+        if(iterations < getNumInserts()) {
+            throw new PerformanceTestException("GreenDAO does not complete the iterations over the queried results");
         }
     }
 
     public void testCounts() throws PerformanceTestException {
         String query;
-        Cursor cursor;
 
-        query = QUERY2;
-        cursor = db.rawQuery(query, null);
-        cursor.getCount();
-        cursor.close();
+        query = "WHERE name = 'Foo1' " +
+                "AND age >= 20 AND age <= 50 " +
+                "AND hired = 1";
+        List<Employee> list = employeeDao.queryRaw(query, null);
+        list.size();
 
-        query = QUERY3;
-        cursor = db.rawQuery(query, null);
-        cursor.getCount();
-        cursor.close();
+        query = "WHERE name = 'Foo3' " +
+                "AND age >= 20 AND age <= 50 " +
+                "AND hired = 1";
+        list = employeeDao.queryRaw(query, null);
+        list.size();
 
-        query = QUERY4;
-        cursor = db.rawQuery(query, null);
-        cursor.getCount();
-        cursor.close();
+        query = "WHERE name = 'Foo2' " +
+                "AND age >= 20 AND age <= 50 " +
+                "AND hired = 0";
+        list = employeeDao.queryRaw(query, null);
+        list.size();
 
-        query = QUERY5;
-        cursor = db.rawQuery(query, null);
-        loopCursor(cursor);
-        cursor.getCount();
+        query = "WHERE name = 'Foo330' " +
+                "AND age >= 20 AND age <= 50 " +
+                "AND hired = 0";
+        list = employeeDao.queryRaw(query, null);
+        list.size();
+
         db.close();
     }
 

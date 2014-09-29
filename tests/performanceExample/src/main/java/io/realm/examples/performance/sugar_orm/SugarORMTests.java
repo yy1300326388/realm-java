@@ -47,7 +47,9 @@ public class SugarORMTests extends PerformanceTest {
                     getEmployeeHiredStatus(row));
             employee.save();
         }
+    }
 
+    public void verifyInserts() throws PerformanceTestException {
         List<SugarEmployee> list = SugarEmployee.listAll(SugarEmployee.class);
         if(list.size() < getNumInserts()) {
             throw new PerformanceTestException("Sugar ORM failed to insert all of the records");
@@ -80,10 +82,15 @@ public class SugarORMTests extends PerformanceTest {
         loopResults(outcome);
     }
 
-    private void loopResults(Select results) {
+    private void loopResults(Select results) throws PerformanceTestException{
+        int iterations = 0;
         for (Object e : results.list()) {
             SugarEmployee emp = (SugarEmployee) e;
             emp.getId();
+            iterations++;
+        }
+        if(iterations < getNumInserts()) {
+            throw new PerformanceTestException("GreenDAO does not complete the iterations over the queried results");
         }
     }
 

@@ -56,13 +56,25 @@ public class ORMLiteTests extends PerformanceTest {
                 }
             });
         }
+    }
 
+    public void verifyInserts() throws PerformanceTestException {
         //Verify writes were successful
         GenericRawResults<String[]> rawResults =
                 employeeDao.queryRaw(
                         "SELECT * from Employee");
-        //The actual verification was removed because in large data sizes
-        //sometimes there is a memory leak created.
+
+        //This verification was removed because in large data sizes
+        //sometimes there is a memory leak created that can crash some devices.
+        //To verify GreenDAO check the database files created
+        //
+        //        List<String[]> results = null;
+        //        try {
+        //            results = rawResults.getResults();
+        //        } catch(SQLException e) {
+        //            e.printStackTrace();
+        //        }
+        //        status += "...Completed " + results.size() + " inserts\n";
 
         helper.close();
     }
@@ -81,23 +93,6 @@ public class ORMLiteTests extends PerformanceTest {
                 return null;
             }
         });
-
-        //Verify writes were successful
-        GenericRawResults<String[]> rawResults =
-                employeeDao.queryRaw(
-                        "SELECT * from Employee");
-
-        helper.close();
-
-        //This verification was removed because in large data sizes
-        //sometimes there is a memory leak created.
-        //        List<String[]> results = null;
-        //        try {
-        //            results = rawResults.getResults();
-        //        } catch(SQLException e) {
-        //            e.printStackTrace();
-        //        }
-        //        status += "...Completed " + results.size() + " inserts\n";
     }
 
     public void testQueries() throws PerformanceTestException {
@@ -116,9 +111,14 @@ public class ORMLiteTests extends PerformanceTest {
         }
     }
 
-    private void loopResults(List<String[]> results) {
+    private void loopResults(List<String[]> results) throws PerformanceTestException{
+        int iterations = 0;
         for (String[] arr : results) {
             int var = arr.length;
+            iterations++;
+        }
+        if(iterations < getNumInserts()) {
+            throw new PerformanceTestException("ORMLite does not complete the iterations over the queried results");
         }
     }
 

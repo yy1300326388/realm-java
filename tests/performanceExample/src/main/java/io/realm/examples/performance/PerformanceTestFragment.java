@@ -66,6 +66,7 @@ public abstract class PerformanceTestFragment extends Fragment {
                         long startTime = System.currentTimeMillis();
                         t.testBatchInserts();
                         //t.testInsertPerTransaction();
+                        t.verifyInserts();
                         long duration = System.currentTimeMillis() - startTime;
                         publishProgress("Inserts: " + duration);
                         t.timings.put("Inserts", (t.getNumInserts() * 1.0 / duration));
