@@ -1,0 +1,62 @@
+[
+    { "name"  : "Arusha",
+      "origin" : "Tanzania" },
+
+    { "name"  : "Bergendal",
+      "origin" : "Indonesia" },
+
+    { "name"  : "Charrieriana",
+      "origin" : "Cameroon" },
+
+    { "name"  : "Colombian",
+      "origin" : "Colombia" },
+
+    { "name"  : "Kona",
+      "origin" : "Hawaii" },
+
+    { "name"  : "Java",
+      "origin" : "Indonesia" },
+
+    { "name"  : "Santos",
+      "origin" : "Brazil" },
+
+    { "name"  : "Blue Mountain",
+      "origin" : "Jamaica" },
+
+    { "name"  : "Bourbon",
+      "origin" : "Rwanda" },
+
+    { "name"  : "Catuai",
+      "origin" : "Latin America" },
+
+    { "name"  : "Caturra",
+      "origin" : "Niceragua" },
+
+    { "name"  : "Columbian",
+      "origin" : "Columbia" },
+
+    { "name"  : "Yirgacheffe",
+      "origin" : "Ethiopia" },
+
+    { "name"  : "French Mission",
+      "origin" : "Algeria" },
+
+    { "name"  : "Guadeloupe",
+      "origin" : "Guadeloupe" },
+
+    { "name"  : "Mocha",
+      "origin" : "Yemen" },
+
+    { "name"  : "Pacas",
+      "origin" : "Latin America" },
+
+    { "name"  : "Reuri",
+      "origin" : "Kenya" },
+
+    { "name"  : "Sarchimor",
+      "origin" : "Costa Rica" },
+
+    { "name"  : "Harar",
+      "origin" : "Ethiopia" }
+
+]
