@@ -63,7 +63,7 @@ public class RealmResults<E extends RealmObject> extends AbstractList<E> {
         return realm;
     }
 
-    TableOrView getTable() {
+    public TableOrView getTable() {
         if (table == null) {
             return realm.getTable(classSpec);
         } else {
