@@ -18,6 +18,7 @@ package io.realm;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
@@ -25,7 +26,6 @@ import java.util.List;
 
 import io.realm.entities.AllTypes;
 import io.realm.entities.Dog;
-import io.realm.exceptions.RealmException;
 import io.realm.internal.Table;
 
 
@@ -133,24 +133,31 @@ public class RealmTest extends AndroidTestCase {
         assertEquals("Unexpected query result after getTable", TEST_DATA_SIZE, table.count(table.getColumnIndex("columnDouble"), 3.1415));
     }
 
-    // <E> void remove(Class<E> clazz, long objectIndex)
-    public void testShouldRemoveRow() {
-
-        testRealm.beginTransaction();
-        testRealm.remove(AllTypes.class, 0);
-        testRealm.commitTransaction();
-
-        RealmResults<AllTypes> resultList = testRealm.where(AllTypes.class).findAll();
-        assertEquals("Realm.delete has not deleted record correctly", TEST_DATA_SIZE - 1, resultList.size());
-
-    }
-
     // <E extends RealmObject> E get(Class<E> clazz, long rowIndex)
     public void testShouldGetObject() {
 
+        // first object
         AllTypes allTypes = testRealm.get(AllTypes.class, 0);
         assertNotNull("get has returned null object", allTypes);
         assertEquals("get has returned wrong object", "test data 0", allTypes.getColumnString());
+
+        // last object
+        allTypes = testRealm.get(AllTypes.class, TEST_DATA_SIZE-1);
+        assertNotNull(allTypes);
+        assertEquals("test data "+(TEST_DATA_SIZE-1), allTypes.getColumnString());
+
+        // out of bound
+        try {
+            allTypes = testRealm.get(AllTypes.class, -1);
+            fail();
+        } catch (IndexOutOfBoundsException ignored) {}
+        catch (Exception ignored) { fail(); }
+
+        try {
+            allTypes = testRealm.get(AllTypes.class, TEST_DATA_SIZE);
+            fail();
+        } catch (IndexOutOfBoundsException ignored) {}
+        catch (Exception ignored) { fail(); }
     }
 
     // boolean contains(Class<?> clazz)
@@ -169,9 +176,10 @@ public class RealmTest extends AndroidTestCase {
 
     // <E extends RealmObject> RealmQuery<E> where(Class<E> clazz)
     public void testShouldReturnResultSet() {
+        RealmQuery<AllTypes> query = testRealm.where(AllTypes.class);
+        assertNotNull(query);
 
         RealmResults<AllTypes> resultList = testRealm.where(AllTypes.class).findAll();
-
         assertEquals("Realm.get is returning wrong number of objects", TEST_DATA_SIZE, resultList.size());
     }
 
@@ -313,9 +321,14 @@ public class RealmTest extends AndroidTestCase {
     }
 
     // <E extends RealmObject> RealmTableOrViewList<E> allObjects(Class<E> clazz)
-    public void testShouldReturnTableOrViewList() {
+    public void testAllObjects() {
         RealmResults<AllTypes> resultList = testRealm.allObjects(AllTypes.class);
         assertEquals("Realm.get is returning wrong result set", TEST_DATA_SIZE, resultList.size());
+
+        testRealm.beginTransaction();
+        testRealm.clear(AllTypes.class);
+        testRealm.commitTransaction();
+        assertEquals(0, testRealm.allObjects(AllTypes.class).size());
     }
 
     /* TODO: re-implement
@@ -617,13 +630,25 @@ public class RealmTest extends AndroidTestCase {
     public void testClassClear() {
 
         // Currently clear will not work outside a transaction:
-
         testRealm.beginTransaction();
         testRealm.clear(AllTypes.class);
         testRealm.commitTransaction();
 
         RealmResults<AllTypes> resultList = testRealm.where(AllTypes.class).findAll();
         assertEquals("Realm.clear does not empty table", 0, resultList.size());
+
+        // clear outside a write transaction
+        try {
+            testRealm.clear(AllTypes.class);
+            fail();
+        } catch (IllegalStateException ignored) {}
+        catch (Exception ignored) {}
+
+        // if no objects, clear must work
+        testRealm.beginTransaction();
+        testRealm.clear(AllTypes.class);
+        testRealm.commitTransaction();
+        assertEquals(0, testRealm.allObjects(AllTypes.class).size());
     }
 
     // void clear(Class<?> classSpec)
@@ -683,11 +708,6 @@ public class RealmTest extends AndroidTestCase {
         try {
             AllTypes aT = testRealm.createObject(AllTypes.class);
             fail("Realm.createObject should fail outside write transaction");
-        } catch (IllegalStateException e) {
-        }
-        try {
-            testRealm.remove(AllTypes.class, 0);
-            fail("Realm.remove should fail outside write transaction");
         } catch (IllegalStateException e) {
         }
     }
@@ -787,5 +807,19 @@ public class RealmTest extends AndroidTestCase {
         assertEquals("Not the expected number records " + resultList.size(), 0, resultList.size());
         resultList = testRealm.where(AllTypes.class).notEqualTo("columnFloat", 11.234567f).equalTo("columnLong", 1).findAll();
         assertEquals("Not the expected number records " + resultList.size(), 1, resultList.size());
+    }
+
+    public void testDeleteRealmFile() {
+        // try to delete a non-existing file
+        assertEquals(true, Realm.deleteRealmFile(getContext(), "just_a_name")); // we can delete a non-existing file with success
+        File file1 = new File(getContext().getFilesDir(), "just_a_name.realm");
+        assertEquals(false, file1.exists());
+
+        // create and remove a file
+        File file2 = new File(getContext().getFilesDir(), "just_another_name.realm");
+        Realm realm = Realm.getInstance(getContext(), "just_another_name");
+        assertEquals(true, file2.exists());
+        assertEquals(true, Realm.deleteRealmFile(getContext(), "just_another_name"));
+        assertEquals(false, file2.exists());
     }
 }

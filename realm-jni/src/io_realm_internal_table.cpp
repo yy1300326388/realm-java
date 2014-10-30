@@ -716,8 +716,11 @@ JNIEXPORT void JNICALL Java_io_realm_internal_Table_nativeClearSubtable(
 JNIEXPORT jlong JNICALL Java_io_realm_internal_Table_nativeGetRowPtr
   (JNIEnv* env, jobject, jlong nativeTablePtr, jlong index)
 {
+    Table* pTable = TBL(nativeTablePtr);
+    if (!TBL_AND_ROW_INDEX_VALID(env, pTable, index))
+        return -1;
     try {
-        Row* row = new Row( (*TBL(nativeTablePtr))[ S(index) ] );
+        Row* row = new Row((*pTable)[ S(index) ] );
         return reinterpret_cast<jlong>(row);
     } CATCH_STD()
     return 0;

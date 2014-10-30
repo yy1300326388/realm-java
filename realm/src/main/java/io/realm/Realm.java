@@ -404,10 +404,6 @@ public class Realm {
         return get(clazz, rowIndex);
     }
 
-    <E> void remove(Class<E> clazz, long objectIndex) {
-        getTable(clazz).moveLastOver(objectIndex);
-    }
-
     <E extends RealmObject> E get(Class<E> clazz, long rowIndex) {
         E result;
 
@@ -666,7 +662,7 @@ public class Realm {
      * The realm must be unused and closed before calling this method.
      * WARNING: Your Realm must not be open (typically when your app launch).
      *
-     * @param context an Android context.
+     * @param context an Android {@link android.content.Context}.
      * @return false if a file could not be deleted. The failing file will be logged.
      * @see io.realm.Realm#clear(Class)
      */
@@ -678,9 +674,9 @@ public class Realm {
      * Delete the Realm file from the filesystem for a custom named Realm.
      * The realm must be unused and closed before calling this method.
      *
-     * @param context  an Android @{{@link android.content.Context}.
+     * @param context  an Android {@link android.content.Context}.
      * @param fileName the name of the custom Realm (i.e. "myCustomRealm.realm").
-     * @return false if a file could not be deleted. The failing file will be logged.
+//     * @return false if a –file could not be deleted. The failing file will be logged.
      */
     public static boolean deleteRealmFile(Context context, String fileName) {
         boolean result = true;
