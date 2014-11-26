@@ -17,6 +17,7 @@
 package io.realm;
 
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import java.util.Date;
 import java.util.concurrent.Callable;
@@ -29,7 +30,7 @@ import io.realm.entities.AllTypes;
 import io.realm.entities.NonLatinFieldNames;
 
 public class RealmResultsTest extends AndroidTestCase {
-    protected final static int TEST_DATA_SIZE = 2516;
+    protected final static int TEST_DATA_SIZE = 516;
     protected final static int TEST_DATA_FIRST_HALF = 2 * (TEST_DATA_SIZE / 4) - 1;
     protected final static int TEST_DATA_LAST_HALF = 2 * (TEST_DATA_SIZE / 4) + 1;
 
@@ -384,6 +385,28 @@ public class RealmResultsTest extends AndroidTestCase {
 
         RealmResults<AllTypes> reserveSortedList = reverseList.sort(FIELD_FLOAT, RealmResults.SORT_ORDER_DECENDING);
         assertEquals(TEST_DATA_SIZE, reserveSortedList.size());
+    }
+
+    public void testSortAfterAddingData() {
+        int j = 1000;
+
+        for (int i = 516; i < j; i++) {
+            testRealm.beginTransaction();
+            AllTypes allTypes = testRealm.createObject(AllTypes.class);
+            allTypes.setColumnString("test data " + i);
+            allTypes.setColumnLong(i);
+            testRealm.commitTransaction();
+            RealmResults<AllTypes> resultList = testRealm.allObjects(AllTypes.class);
+          //  RealmResults<AllTypes> newresultList = testRealm.allObjects(AllTypes.class).sort(FIELD_STRING);
+         //   assertEquals("Should have same size", testRealm.allObjects(AllTypes.class).size(), newresultList.size());
+            //Log.i("i = ", String.valueOf(i));
+        }
+    }
+
+    public void testManyTimes() {
+        for (int i = 0; i < 5; i++) {
+            testSortAfterAddingData();
+        }
     }
 
     public void testSortOnNonExistingColumn() {
