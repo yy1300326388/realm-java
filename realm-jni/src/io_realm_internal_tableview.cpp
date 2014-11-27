@@ -917,10 +917,10 @@ JNIEXPORT jlong JNICALL Java_io_realm_internal_TableView_nativeMinimumDate(
 JNIEXPORT void JNICALL Java_io_realm_internal_TableView_nativeSort(
     JNIEnv* env, jobject, jlong nativeViewPtr, jlong columnIndex, jboolean ascending)
 {
-    TV(nativeViewPtr)->sync_if_needed();
     if (!VIEW_VALID(env, nativeViewPtr) ||
         !COL_INDEX_VALID(env, TV(nativeViewPtr), columnIndex))
         return;
+    TV(nativeViewPtr)->sync_if_needed();
 
     int colType = TV(nativeViewPtr)->get_column_type( S(columnIndex) );
     switch (colType) {
@@ -998,10 +998,10 @@ JNIEXPORT jstring JNICALL Java_io_realm_internal_TableView_nativeRowToString(
 JNIEXPORT jlong JNICALL Java_io_realm_internal_TableView_nativeWhere
   (JNIEnv *env, jobject, jlong nativeViewPtr)
 {
-    TV(nativeViewPtr)->sync_if_needed();
     if (!VIEW_VALID(env, nativeViewPtr))
         return 0;
 
+    TV(nativeViewPtr)->sync_if_needed();
     try {
         TableView* tv = TV(nativeViewPtr);
         Query query = tv->get_parent().where(tv);
