@@ -387,6 +387,51 @@ public class RealmResultsTest extends AndroidTestCase {
         assertEquals(TEST_DATA_SIZE, reserveSortedList.size());
     }
 
+    public void testSizeAfterSortAndAddingData() {
+        int j = 1000;
+        int size = testRealm.where(AllTypes.class).findAll().size();
+        assertEquals(testRealm.allObjects(AllTypes.class).size(), size);
+
+        for (int i = 516; i < j; i++) {
+            testRealm.beginTransaction();
+            AllTypes allTypes = testRealm.createObject(AllTypes.class);
+            allTypes.setColumnString("test data " + i);
+            allTypes.setColumnLong(i);
+            testRealm.commitTransaction();
+            //int size = testRealm.allObjects(AllTypes.class).size();
+            int new_size = testRealm.allObjects(AllTypes.class).size();
+            assertEquals("Should have same size", testRealm.allObjects(AllTypes.class).size(), new_size);
+            //Log.i("i = ", String.valueOf(i));
+        }
+    }
+
+    public void testSizeManyTimes() {
+        for (int i = 1; i < 101; i++) {
+           // Log.i("Starting test number: ", String.valueOf(i));
+            testSizeAfterSortAndAddingData();
+        }
+    }
+    //This method is giving the fatal signal 11 most
+    public void testSortAfterAddingDataFirst() {
+        int j = 1000;
+        RealmResults<AllTypes> resultList = testRealm.where(AllTypes.class).findAll().sort(FIELD_STRING);
+        assertEquals(testRealm.allObjects(AllTypes.class).size(), resultList.size());
+
+        for (int i = 516; i < j; i++) {
+            testRealm.beginTransaction();
+            AllTypes allTypes = testRealm.createObject(AllTypes.class);
+            allTypes.setColumnString("test data " + i);
+            allTypes.setColumnLong(i);
+            testRealm.commitTransaction();
+            RealmResults<AllTypes> newresultList = testRealm.allObjects(AllTypes.class).sort(FIELD_STRING);
+            //int resultSize = newresultList.size();
+
+            //Main cause might be here
+            assertEquals("Should have same size", testRealm.allObjects(AllTypes.class).size(), newresultList.size());
+            //Log.i("i = ", String.valueOf(i));
+        }
+    }
+
     public void testSortAfterAddingData() {
         int j = 1000;
 
@@ -396,17 +441,35 @@ public class RealmResultsTest extends AndroidTestCase {
             allTypes.setColumnString("test data " + i);
             allTypes.setColumnLong(i);
             testRealm.commitTransaction();
-            RealmResults<AllTypes> resultList = testRealm.allObjects(AllTypes.class);
-          //  RealmResults<AllTypes> newresultList = testRealm.allObjects(AllTypes.class).sort(FIELD_STRING);
-         //   assertEquals("Should have same size", testRealm.allObjects(AllTypes.class).size(), newresultList.size());
+            //int size = testRealm.allObjects(AllTypes.class).size();
+            RealmResults<AllTypes> newresultList = testRealm.allObjects(AllTypes.class).sort(FIELD_STRING);
+           // assertEquals("Should have same size", testRealm.allObjects(AllTypes.class).size(), newresultList.size());
             //Log.i("i = ", String.valueOf(i));
         }
     }
 
-    public void testManyTimes() {
-        for (int i = 0; i < 5; i++) {
-            testSortAfterAddingData();
+    public void testSortAfterAddingSingleData() {
+        int j = 1000;
+
+        for (int i = 516; i < j; i++) {
+            testRealm.beginTransaction();
+            AllTypes allTypes = testRealm.createObject(AllTypes.class);
+            allTypes.setColumnString("test data " + i);
+            testRealm.commitTransaction();
+            //int size = testRealm.allObjects(AllTypes.class).size();
+            RealmResults<AllTypes> newresultList = testRealm.allObjects(AllTypes.class).sort(FIELD_STRING);
+            //assertEquals("Should have same size", testRealm.allObjects(AllTypes.class).size(), newresultList.size());
+            //Log.i("i = ", String.valueOf(i));
         }
+    }
+
+    public void testAllSortAfterAddingData() {
+        Log.i("test = ", String.valueOf(1));
+            testSortAfterAddingDataFirst();
+        Log.i("test = ", String.valueOf(2));
+            testSortAfterAddingSingleData();
+        Log.i("test = ", String.valueOf(3));
+            testSortAfterAddingData();
     }
 
     public void testSortOnNonExistingColumn() {
