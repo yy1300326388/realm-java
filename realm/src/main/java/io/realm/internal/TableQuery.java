@@ -55,7 +55,10 @@ public class TableQuery implements Closeable {
     protected void finalize() {
         synchronized (context) {
             if (nativePtr != 0) {
-                context.asyncDisposeQuery(nativePtr); 
+                context.asyncDisposeQuery(nativePtr);
+            if (DEBUG)
+                System.err.println("++++ Query FINALIZE, ptr= " + nativePtr);
+
                 nativePtr = 0; // Set to 0 if finalize is called before close() for some reason
             }
         }
@@ -458,28 +461,28 @@ public class TableQuery implements Closeable {
 
     protected native long nativeFind(long nativeQueryPtr, long fromTableRow);
 
-    public TableView findAll(long start, long end, long limit){
+    public TableView findAll(long start, long end, long limit) {
         validateQuery();
 
         // Execute the disposal of abandoned realm objects each time a new realm object is created
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAll(nativePtr, start, end, limit);
         try {
-            return new TableView(this.context, this.parent, nativeViewPtr);
+            return new TableView(this.context, this.parent, nativePtr, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
         }
     }
 
-    public TableView findAll(){
+    public TableView findAll() {
         validateQuery();
 
         // Execute the disposal of abandoned realm objects each time a new realm object is created
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAll(nativePtr, 0, Table.INFINITE, Table.INFINITE);
         try {
-            return new TableView(this.context, this.parent, nativeViewPtr);
+            return new TableView(this.context, this.parent, nativePtr, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -494,7 +497,7 @@ public class TableQuery implements Closeable {
 
     // Integer aggregation
 
-    public long sumInt(long columnIndex, long start, long end, long limit){
+    public long sumInt(long columnIndex, long start, long end, long limit) {
         validateQuery();
         return nativeSumInt(nativePtr, columnIndex, start, end, limit);
     }

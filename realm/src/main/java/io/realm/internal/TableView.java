@@ -64,6 +64,7 @@ import java.util.Date;
  */
 public class TableView implements TableOrView, Closeable {
     protected boolean DEBUG = false; //true;
+    private long nativeQueryPtr;
 
      /**
      * Creates a TableView with already created Java TableView Object and a
@@ -73,10 +74,13 @@ public class TableView implements TableOrView, Closeable {
      * @param parent A table.
      * @param nativePtr pointer to table.
      */
-    protected TableView(Context context, Table parent, long nativePtr){
+    protected TableView(Context context, Table parent, long nativeQueryPtr, long nativePtr) {
+        if (DEBUG)
+            System.err.println("++++++ new TableView, ptr= " + nativePtr);
         this.context = context;
         this.parent = parent;
         this.nativePtr = nativePtr;
+        this.nativeQueryPtr = nativeQueryPtr;
     }
 
     @Override
@@ -85,7 +89,7 @@ public class TableView implements TableOrView, Closeable {
     }
 
     @Override
-    public void close(){
+    public void close() {
         synchronized (context) {
             if (nativePtr != 0) {
                 nativeClose(nativePtr);
@@ -94,7 +98,7 @@ public class TableView implements TableOrView, Closeable {
                     System.err.println("==== TableView CLOSE, ptr= " + nativePtr);
               
                 nativePtr = 0;
-            } 
+            }
         }
     }
     
@@ -102,6 +106,8 @@ public class TableView implements TableOrView, Closeable {
         synchronized (context) {
             if (nativePtr != 0) {
                 context.asyncDisposeTableView(nativePtr);
+                if (DEBUG)
+                    System.err.println("==== TableView FINALIZE, ptr= " + nativePtr);
                 nativePtr = 0; // Set to 0 if finalize is called before close() for some reason
             }
         }
@@ -620,7 +626,7 @@ public class TableView implements TableOrView, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllInt(nativePtr, columnIndex, value);
         try { 
-            return new TableView(this.context, this.parent, nativeViewPtr);
+            return new TableView(this.context, this.parent, nativeQueryPtr, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -635,7 +641,7 @@ public class TableView implements TableOrView, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllBool(nativePtr, columnIndex, value);
         try { 
-            return new TableView(this.context, this.parent, nativeViewPtr);
+            return new TableView(this.context, this.parent, nativeQueryPtr, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -650,7 +656,7 @@ public class TableView implements TableOrView, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllFloat(nativePtr, columnIndex, value);
         try { 
-            return new TableView(this.context, this.parent, nativeViewPtr);
+            return new TableView(this.context, this.parent, nativeQueryPtr, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -665,7 +671,7 @@ public class TableView implements TableOrView, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllDouble(nativePtr, columnIndex, value);
         try { 
-            return new TableView(this.context, this.parent, nativeViewPtr);
+            return new TableView(this.context, this.parent, nativeQueryPtr, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -680,7 +686,7 @@ public class TableView implements TableOrView, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllDate(nativePtr, columnIndex, date.getTime()/1000);
         try { 
-            return new TableView(this.context, this.parent, nativeViewPtr);
+            return new TableView(this.context, this.parent, nativeQueryPtr, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -695,7 +701,7 @@ public class TableView implements TableOrView, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllString(nativePtr, columnIndex, value);
         try { 
-            return new TableView(this.context, this.parent, nativeViewPtr);
+            return new TableView(this.context, this.parent, nativeQueryPtr, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;

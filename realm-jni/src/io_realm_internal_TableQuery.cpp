@@ -51,7 +51,9 @@ inline bool query_col_type_valid(JNIEnv* env, jlong nativeQueryPtr, jlong colInd
 
 JNIEXPORT void JNICALL Java_io_realm_internal_TableQuery_nativeClose(JNIEnv * env, jclass, jlong nativeQueryPtr) {
     TR((env, "Query nativeClose(ptr %x)\n", nativeQueryPtr));
-    delete Q(nativeQueryPtr);
+    TQ(nativeQueryPtr)->dec_tableview();
+    if (TQ(nativeQueryPtr)->get_tableview() == 0) 
+        delete TQ(nativeQueryPtr);
 }
 
 JNIEXPORT jstring JNICALL Java_io_realm_internal_TableQuery_nativeValidateQuery
@@ -745,11 +747,12 @@ JNIEXPORT void JNICALL Java_io_realm_internal_TableQuery_nativeContains(
 JNIEXPORT void JNICALL Java_io_realm_internal_TableQuery_nativeTableview(
     JNIEnv* env, jobject, jlong nativeQueryPtr, jlong nativeTableViewPtr)
 {
-    Query* pQuery = Q(nativeQueryPtr);
+    TableQuery* pQuery = TQ(nativeQueryPtr);
     if (!QUERY_VALID(env, pQuery))
         return;
     try {
         pQuery->get_table()->where(TV(nativeTableViewPtr));
+        pQuery->inc_tableview();
     } CATCH_STD()
 }
 
@@ -848,13 +851,14 @@ JNIEXPORT jlong JNICALL Java_io_realm_internal_TableQuery_nativeFind(
 JNIEXPORT jlong JNICALL Java_io_realm_internal_TableQuery_nativeFindAll(
     JNIEnv* env, jobject, jlong nativeQueryPtr, jlong start, jlong end, jlong limit)
 {
-    Query* pQuery = Q(nativeQueryPtr);
+    TableQuery* pQuery = TQ(nativeQueryPtr);
     Table* pTable = Ref2Ptr(pQuery->get_table());
     if (!QUERY_VALID(env, pQuery) ||
         !ROW_INDEXES_VALID(env, pTable, start, end, limit))
         return -1;
     try {
-        TableView* pResultView = new TableView( pQuery->find_all(S(start), S(end), S(limit)) );
+        TableView* pResultView = new TableView(pQuery->find_all(S(start), S(end), S(limit)));
+        pQuery->inc_tableview();
         return reinterpret_cast<jlong>(pResultView);
     } CATCH_STD()
     return -1;

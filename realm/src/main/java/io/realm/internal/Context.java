@@ -51,12 +51,13 @@ class Context {
             }
             abandonedTableViews.clear();
 
+            System.err.println("executeDelayedDisposal Queries: " + abandonedQueries.size());
             for (long nativePointer: abandonedQueries) {
                 TableQuery.nativeClose(nativePointer);
             }
             abandonedQueries.clear();
         }
-    }
+   }
 
     public void asyncDisposeTable(long nativePointer, boolean isRoot) {
         if (isRoot || isFinalized) {

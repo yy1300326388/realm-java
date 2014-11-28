@@ -144,7 +144,7 @@ public class RealmResults<E extends RealmObject> extends AbstractList<E> {
      * @return               A sorted RealmResults list.
      */
     public RealmResults<E> sort(String fieldName, boolean sortAscending) {
-        TableView sorted;
+        TableView sorted = null;
 
         realm.checkIfValid();
         TableOrView table = getTable();

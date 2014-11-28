@@ -519,7 +519,7 @@ public class Table implements TableOrView, TableSchema, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeGetSortedView(nativePtr, columnIndex, (order == TableView.Order.ascending));
         try {
-            return new TableView(this.context, this, nativeViewPtr);
+            return new TableView(this.context, this, 0, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -536,7 +536,7 @@ public class Table implements TableOrView, TableSchema, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeGetSortedView(nativePtr, columnIndex, true);
         try {
-            return new TableView(this.context, this, nativeViewPtr);
+            return new TableView(this.context, this, 0, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -1268,7 +1268,7 @@ public class Table implements TableOrView, TableSchema, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllInt(nativePtr, columnIndex, value);
         try {
-            return new TableView(this.context, this, nativeViewPtr);
+            return new TableView(this.context, this, 0, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -1283,7 +1283,7 @@ public class Table implements TableOrView, TableSchema, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllBool(nativePtr, columnIndex, value);
         try {
-            return new TableView(this.context, this, nativeViewPtr);
+            return new TableView(this.context, this, 0, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -1298,7 +1298,7 @@ public class Table implements TableOrView, TableSchema, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllFloat(nativePtr, columnIndex, value);
         try {
-            return new TableView(this.context, this, nativeViewPtr);
+            return new TableView(this.context, this, 0, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -1313,7 +1313,7 @@ public class Table implements TableOrView, TableSchema, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllDouble(nativePtr, columnIndex, value);
         try {
-            return new TableView(this.context, this, nativeViewPtr);
+            return new TableView(this.context, this, 0, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -1328,7 +1328,7 @@ public class Table implements TableOrView, TableSchema, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllDate(nativePtr, columnIndex, date.getTime() / 1000);
         try {
-            return new TableView(this.context, this, nativeViewPtr);
+            return new TableView(this.context, this, 0, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -1343,7 +1343,7 @@ public class Table implements TableOrView, TableSchema, Closeable {
         context.executeDelayedDisposal();
         long nativeViewPtr = nativeFindAllString(nativePtr, columnIndex, value);
         try {
-            return new TableView(this.context, this, nativeViewPtr);
+            return new TableView(this.context, this, 0, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;
@@ -1386,7 +1386,7 @@ public class Table implements TableOrView, TableSchema, Closeable {
         this.context.executeDelayedDisposal();
         long nativeViewPtr = nativeGetDistinctView(nativePtr, columnIndex);
         try {
-            return new TableView(this.context, this, nativeViewPtr);
+            return new TableView(this.context, this, 0, nativeViewPtr);
         } catch (RuntimeException e) {
             TableView.nativeClose(nativeViewPtr);
             throw e;

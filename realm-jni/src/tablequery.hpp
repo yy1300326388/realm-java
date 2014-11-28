@@ -27,6 +27,9 @@ class TableQuery : public tightdb::Query {
     // table and verify the parameters related to that table.
     std::vector<size_t> subtables;  // holds subtable column indeces 
 
+    // 'tableviews' is a counter of how many tableviews are using the query
+    size_t tableviews;
+
 public:
     TableQuery(const Query& copy) : tightdb::Query(copy, TCopyExpressionTag()) {};
  
@@ -40,7 +43,20 @@ public:
         subtables.pop_back();
         return true;
     }
+
+    void inc_tableview() {
+        tableviews++;
+    }
+
+    void dec_tableview() {
+        tableviews--;
+    }
     
+    size_t get_tableview() {
+        return tableviews;
+    }
+
+   
     tightdb::TableRef get_current_table() {
         tightdb::TableRef table = get_table();
 

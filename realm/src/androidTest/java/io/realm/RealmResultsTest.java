@@ -583,4 +583,27 @@ public class RealmResultsTest extends AndroidTestCase {
         RealmResults<AllTypes> stillNone = none.where().greaterThan(FIELD_LONG, TEST_DATA_SIZE).findAll();
         assertEquals(0, stillNone.size());
     }
+
+    //This method is giving the fatal signal 11 most
+    public void testSortAfterAddingDataFirst() {
+        int j = 1000;
+        RealmResults<AllTypes> resultList = testRealm.where(AllTypes.class).findAll().sort(FIELD_STRING);
+        assertEquals(testRealm.allObjects(AllTypes.class).size(), resultList.size());
+
+        int i = 42;
+        while (true) {
+            testRealm.beginTransaction();
+            AllTypes allTypes = testRealm.createObject(AllTypes.class);
+            allTypes.setColumnString("test data " + i);
+            allTypes.setColumnLong(i);
+            testRealm.commitTransaction();
+            RealmResults<AllTypes> newresultList = testRealm.allObjects(AllTypes.class).sort(FIELD_STRING);
+            int resultSize = newresultList.size();
+
+            //Main cause might be here
+            assertEquals("Should have same size", testRealm.allObjects(AllTypes.class).size(), newresultList.size());
+            //Log.i("i = ", String.valueOf(i));
+        }
+    }
+
 }
