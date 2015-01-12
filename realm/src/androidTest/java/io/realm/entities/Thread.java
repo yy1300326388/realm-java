@@ -18,15 +18,14 @@ package io.realm.entities;
 
 import io.realm.RealmObject;
 
-public class StringOnly extends RealmObject {
+public class Thread extends RealmObject {
+    private String name;
 
-    private String chars;
-
-    public String getChars() {
-        return chars;
+    public String getName() {
+        return name;
     }
 
-    public void setChars(String chars) {
-        this.chars = chars;
+    public void setName(String name) {
+        this.name = name;
     }
 }
