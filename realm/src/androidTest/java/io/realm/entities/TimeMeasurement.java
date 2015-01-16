@@ -16,19 +16,21 @@
 
 package io.realm.entities;
 
-import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
 
 public class TimeMeasurement {
 
-    private ArrayList<ArrayList<Long>> times = new ArrayList<ArrayList<Long>>();
-    private ArrayList<Double> statistics_times = new ArrayList<Double>();
-
     private String time_Unit = "ns";
 
-    private int DATA_SIZE = 10000;
+    public static final int DATA_SIZE = 10000;
 
     public void clearRealm(Realm testRealm) {
         testRealm.beginTransaction();
@@ -39,8 +41,6 @@ public class TimeMeasurement {
     //Creates data for realm with argument size
     public void addObjectToTestRealm(int objects, Realm testRealm) {
         testRealm.beginTransaction();
-        testRealm.allObjects(StringOnly.class).clear();
-
         for (int i = 0; i < objects; ++i) {
             StringOnly stringOnly = testRealm.createObject(StringOnly.class);
             stringOnly.setChars("test data " + i);
@@ -48,158 +48,207 @@ public class TimeMeasurement {
         testRealm.commitTransaction();
     }
 
-    public ArrayList<ArrayList<Long>> timer(Realm testRealm, int times_to_warm_up, int times_to_execute, TimeUnit timeUnit, ExecutePerformance executePerformance) {
-        ArrayList<Long> warm_up_times = new ArrayList<Long>();
-        ArrayList<Long> test_times = new ArrayList<Long>();
-        int invalid = 0;
+    public void testAdd(Realm testRealm) {
+        for (int i = 0; i < 20; i++) {
+            addObjectToTestRealm(DATA_SIZE, testRealm);
+            clearRealm(testRealm);
+        }
+    }
+
+    public void timer(String name, Realm testRealm, int times_to_warm_up, int times_to_execute, TimeUnit timeUnit, ExecutePerformance executePerformance) {
+        String fileName_test = name + "time_in_" + time_Unit;
+        String fileName_warm_up = "warm_up_" + name + "_in_" + time_Unit;
+        deleteFile(fileName_test);
+        deleteFile(fileName_warm_up);
 
         for (int i = 0; i < times_to_execute + times_to_warm_up; i++) {
             addObjectToTestRealm(DATA_SIZE, testRealm);
             long start = System.nanoTime();
             executePerformance.execute();
             long stop = System.nanoTime();
-            long time_nano = stop - start;
-            if (time_nano != 0) {
+            long time = stop - start;
+            if (time != 0) {
+                if (timeUnit != TimeUnit.NANOSECONDS) {
+                    time = timeConverting(time, timeUnit);
+                }
+
                 if (i < times_to_warm_up) {
-                    warm_up_times.add(i - invalid, time_nano);
+                    write(fileName_warm_up, String.valueOf(time));
                 } else {
-                    test_times.add(i - warm_up_times.size() - invalid, time_nano);
+                    write(fileName_test, String.valueOf(time));
                 }
             } else {
-                invalid++;
             }
             clearRealm(testRealm);
         }
-        times.add(0, warm_up_times);
-        times.add(1, test_times);
-        if (timeUnit != TimeUnit.NANOSECONDS) {
-            times = timeConverting(times, timeUnit);
-        }
-        setStatistics(times.get(1));
-        return times;
+        setStatistics(getFile(fileName_test), name);
     }
 
-    public ArrayList<ArrayList<Long>> timeConverting(ArrayList<ArrayList<Long>> times, TimeUnit timeUnit) {
-        setTimeUnit(timeUnit);
-        for (int i = 0; i < times.size(); i++) {
-            for (int j = 0; j < times.get(i).size(); j++) {
+    public void write(String fileName, String content) {
+        try {
+            String file_path = "/data/data/io.realm.test/files/" + fileName + ".txt";
+            File file = new File(file_path);
 
-                switch (timeUnit) {
-                    case MICROSECONDS: {
-                        long time_micro = TimeUnit.MICROSECONDS.convert(times.get(i).get(j), TimeUnit.NANOSECONDS);
-                        times.get(i).set(j, time_micro);
-                    }break;
-                    case MILLISECONDS: {
-                        long time_milli = TimeUnit.MILLISECONDS.convert(times.get(i).get(j), TimeUnit.NANOSECONDS);
-                        times.get(i).set(j, time_milli);
-                    }break;
-                    case SECONDS: {
-                        long time_sec = TimeUnit.SECONDS.convert(times.get(i).get(j), TimeUnit.NANOSECONDS);
-                        times.get(i).set(j, time_sec);
-                    }break;
-                    default:
-                        break;
-                }
-
+            if (!file.exists()) {
+                file.createNewFile();
             }
+            FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write(content);
+            bw.newLine();
+            bw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return times;
+    }
+
+    public void deleteFile(String fileName) {
+        String file_path = "/data/data/io.realm.test/files/" + fileName + ".txt";
+        File file = new File(file_path);
+        file.delete();
+    }
+
+    public File getFile(String fileName) {
+        File file = new File("/data/data/io.realm.test/files/" + fileName + ".txt");
+        return file;
+    }
+
+    public long timeConverting(Long time, TimeUnit timeUnit) {
+        setTimeUnit(timeUnit);
+        switch (timeUnit) {
+            case MICROSECONDS: {
+                time = TimeUnit.MICROSECONDS.convert(time, TimeUnit.NANOSECONDS);
+            }
+            break;
+            case MILLISECONDS: {
+                time = TimeUnit.MILLISECONDS.convert(time, TimeUnit.NANOSECONDS);
+            }
+            break;
+            case SECONDS: {
+                time = TimeUnit.SECONDS.convert(time, TimeUnit.NANOSECONDS);
+            }
+            break;
+
+            default:
+                break;
+        }
+        return time;
     }
 
     public void setTimeUnit(TimeUnit timeUnit) {
         switch (timeUnit) {
             case MICROSECONDS: {
                 time_Unit = "μs";
-            }break;
+            }
+            break;
             case MILLISECONDS: {
                 time_Unit = "ms";
-            }break;
+            }
+            break;
             case SECONDS: {
                 time_Unit = "s";
-            }break;
+            }
+            break;
             default:
                 break;
         }
 
     }
 
-    public ArrayList<ArrayList<String>> timeAsString(ArrayList<ArrayList<Long>> times, TimeUnit timeUnit) {
-        ArrayList<ArrayList<String>> times_string = new ArrayList<ArrayList<String>>();
-        ArrayList<String> warm_up_times_string = new ArrayList<String>();
-        ArrayList<String> test_times_string = new ArrayList<String>();
-        for (int i = 0; i < times.size(); i++) {
-            for (int j = 0; j < times.get(i).size(); j++) {
-                if (i == 0) {
-                    warm_up_times_string.add(j, String.valueOf(times.get(0).get(j)) + time_Unit);
-                } else {
-                    test_times_string.add(j, String.valueOf(times.get(1).get(j)) + time_Unit);
+    public double minimum(File file) {
+        double current = 0;
+        double min = 0;
+        try {
+            Scanner scanner = new Scanner(file);
+            try {
+                min = Double.valueOf(scanner.nextLine());
+                while (scanner.hasNextLine()) {
+                    current = Double.valueOf(scanner.nextLine());
+                    if (current < min) {
+                        min = current;
+                    }
                 }
+            } catch (Exception e) {
             }
-        }
-        times_string.add(0, warm_up_times_string);
-        times_string.add(1, test_times_string);
-        return times_string;
-    }
 
-    public double minimum(ArrayList<Long> times) {
-        double min = times.get(0);
-        for (int i = 1; i < times.size(); i++) {
-            if (times.get(i) < min) {
-                min = times.get(i);
-            }
+        } catch (FileNotFoundException e) {
         }
+
         return min;
     }
 
-    public double maximum(ArrayList<Long> times) {
-        double max = times.get(0);
-        for (int i = 1; i < times.size(); i++) {
-            if (times.get(i) > max) {
-                max = times.get(i);
+
+    public double maximum(File file) {
+        double current = 0;
+        double max = 0;
+        try {
+            Scanner scanner = new Scanner(file);
+            max = Double.valueOf(scanner.nextLine());
+            try {
+                max = Double.valueOf(scanner.nextLine());
+                while (scanner.hasNextLine()) {
+                    current = Double.valueOf(scanner.nextLine());
+                    if (current > max) {
+                        max = current;
+                    }
+                }
+            } catch (Exception e) {
             }
+        } catch (FileNotFoundException e) {
+
         }
         return max;
     }
-    public double average(ArrayList<Long> times) {
+
+    public double average(File file) {
         double sum = 0;
-        for (int i = 0; i < times.size(); i++) {
-            sum += times.get(i);
+        int count = 0;
+        try {
+            Scanner scanner = new Scanner(file);
+            try {
+                while (scanner.hasNextLine()) {
+                    sum += Double.valueOf(scanner.nextLine());
+                    count++;
+                }
+            } catch (Exception e) {
+            }
+        } catch (FileNotFoundException e) {
+
         }
-        return sum/times.size();
+        return sum / count;
     }
 
-    public double variance(ArrayList<Long> times)
-    {
-        double avg = average(times);
+    public double variance(File file) {
+        double avg = average(file);
         double temp = 0;
-        for(int i = 0; i < times.size(); i++) {
-            temp += (avg - (double) times.get(i)) * (avg - (double) times.get(i));
+        double current = 0;
+        int count = 0;
+        try {
+            Scanner scanner = new Scanner(file);
+            try {
+                while (scanner.hasNextLine()) {
+                    current = Double.valueOf(scanner.nextLine());
+                    temp += ((avg - current) * (avg - current));
+                    count++;
+                }
+            } catch (Exception e) {
+            }
+        } catch (FileNotFoundException e) {
+
         }
-        return (temp/times.size());
+        return temp / count;
     }
 
-    public double stdDev(ArrayList<Long> times) {
-        return Math.sqrt(variance(times));
+    public double stdDev(File file) {
+        return Math.sqrt(variance(file));
     }
 
-    public void setStatistics(ArrayList<Long> times){
-        //statistics_times.clear();
-        statistics_times.add(minimum(times));
-        statistics_times.add(maximum(times));
-        statistics_times.add(average(times));
-        statistics_times.add(variance(times));
-        statistics_times.add(stdDev(times));
-    }
-
-    public ArrayList<Double> getStatistics() {
-        return statistics_times;
-    }
-
-    public ArrayList<String> getStatisticsString() {
-        ArrayList<String> statistics_times_string = new ArrayList<String>();
-        for (int i = 0; i < statistics_times.size(); i++) {
-            statistics_times_string.add(i, String.valueOf(statistics_times.get(i)) + time_Unit);
-        }
-        return statistics_times_string;
+    public void setStatistics(File file, String name) {
+        String fileName = "Statistics_for_" + name + "_in_" + time_Unit;
+        write(fileName, String.valueOf(minimum(file)));
+        write(fileName, String.valueOf(maximum(file)));
+        write(fileName, String.valueOf(average(file)));
+        write(fileName, String.valueOf(variance(file)));
+        write(fileName, String.valueOf(stdDev(file)));
     }
 }
