@@ -23,17 +23,25 @@ import io.realm.entities.ExecutePerformance;
 import io.realm.entities.Performance;
 import io.realm.entities.TimeMeasurement;
 
+// After the tests have been ran you can do "adb pull /data/data/io.realm.test/files/ your/directory"
+// in your terminal to copy the folder where the text files are.
+// The text file name describes which test and what time unit it was ran in.
+
 public class RealmPerformanceTest extends AndroidTestCase {
 
     private Realm testRealm;
 
     private RealmResults<Performance> realmResults;
 
+    //Sets numbers of time to execute the test.
     private int execute_times = 10;
+
+    //Sets numbers of time to warm up running the test.
     private int warm_up_times = 10;
 
     private TimeMeasurement timeMeasurement = new TimeMeasurement();
 
+    //Sets time unit for time in tests.
     private TimeUnit timeUnit = TimeUnit.NANOSECONDS;
 
     @Override
@@ -91,7 +99,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Remove disabled from method name to run this test
+    //Remove disabled from method name to run this test.
     public void disabledtestInsertIntegerMultiCommits() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -107,7 +115,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Remove disabled from method name to run this test
+    //Remove disabled from method name to run this test.
     public void disabledtestInsertStringMultiCommits() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -123,7 +131,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Test for query timing
+    //Test for query timing.
     public void testQuery() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -134,7 +142,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Test for size timing
+    //Test for size timing.
     public void testSize() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -146,7 +154,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Test for sorting timing
+    //Test for sorting timing.
     public void testSort() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -158,7 +166,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Test for clearing timing
+    //Test for clearing timing.
     public void testClear() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -171,13 +179,13 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Test for enumerate and access query timing
+    //Test for enumerating and access query with for loop timing.
     public void testEnumerateAndAccessQueryWithForLoop() {
         String name = getName();
-        realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
+                realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
                 for (int i = 0; i < realmResults.size(); i++) {
                     realmResults.get(i).getString();
                 }
@@ -185,13 +193,13 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Test for enumerate and access query timing
+    //Test for enumerating and access query with iterator timing.
     public void testEnumerateAndAccessQueryWithIterator() {
         String name = getName();
-        realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
+                realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
                 for (Performance performance : realmResults) {
                     performance.getString();
                 }
@@ -199,13 +207,13 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    // Test for modifying values
+    //Test for enumerating modifying values with for loop timing.
     public void testEnumerateAndMutateStringWithForLoop() {
         String name = getName();
-        realmResults = testRealm.allObjects(Performance.class);
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
+                realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
                 testRealm.beginTransaction();
                 for (int i = 0; i < realmResults.size(); i++) {
                     realmResults.get(i).setString("c");
@@ -215,7 +223,8 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Not working right now
+    //Not working right now.
+    //Test for enumerating modifying values with iterator timing.
 /*    public void testEnumerateAndMutateWithIterator() {
         String name = getName();
         realmResults = testRealm.allObjects(Performance.class);
@@ -231,35 +240,35 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }*/
 
-    //Test for insert multiple with index
+    //Test for string insert with index timing.
     public void testInsertStringWithIndex() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
-                    @Override
-                    public void execute() {
-                        testRealm.beginTransaction();
-                        for (int i = 0; i < timeMeasurement.DATA_SIZE; i++) {
-                            Performance performance = testRealm.createObject(Performance.class);
-                            performance.setString_index("a");
-                        }
-                        testRealm.commitTransaction();
-                    }
-                });
+            @Override
+            public void execute() {
+                testRealm.beginTransaction();
+                for (int i = 0; i < timeMeasurement.DATA_SIZE; i++) {
+                    Performance performance = testRealm.createObject(Performance.class);
+                    performance.setString_index("a");
+                }
+                testRealm.commitTransaction();
+            }
+        });
     }
 
 
-    //Test for query with index timing
+    //Test for query with index timing.
     public void testQueryWithIndex() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
-                    RealmResults<Performance> realmResults = testRealm.allObjects(Performance.class);
+                RealmResults<Performance> realmResults = testRealm.where(Performance.class).contains("string_index", "200").findAll();
             }
         });
     }
 
-    //Test for enumerate and access query timing
+    //Test for enumerating and access query timing.
     public void testEnumerateAndAccessQueryWithForLoopIndex() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -286,7 +295,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
             }
         });
     }
-
+    //Test for minimum timing.
     public void testMinimum() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -298,6 +307,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
+    //Test for maximum timing.
     public void testMaximum() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -309,6 +319,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
+    //Test for summing timing.
     public void testSum() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -320,6 +331,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
+    //Test for average timing.
     public void testAverage() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -327,6 +339,45 @@ public class RealmPerformanceTest extends AndroidTestCase {
             public void execute() {
                 realmResults = testRealm.where(Performance.class).findAll();
                 double avg = realmResults.average("integer");
+            }
+        });
+    }
+
+    //Test for transaction timing.
+    public void testTransaction() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                testRealm.beginTransaction();
+                testRealm.commitTransaction();
+            }
+        });
+    }
+
+    //Test for transaction block timing.
+    public void testTransactionBlock() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                testRealm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+
+                    }
+                });
+            }
+        });
+    }
+
+    //Test for allObjects timing.
+    public void testAllObjects() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                testRealm.allObjects(Performance.class);
             }
         });
     }

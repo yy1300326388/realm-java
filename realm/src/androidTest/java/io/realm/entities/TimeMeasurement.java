@@ -32,10 +32,12 @@ public class TimeMeasurement {
 
     private String time_Unit = "ns";
 
+    //Size of data for testing.
     public static final int DATA_SIZE = 1000;
 
-    private DecimalFormat decimalFormat = new DecimalFormat("##.##");
+    private DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
+    //Clears data from realm.
     public void clearRealm(Realm testRealm) {
         testRealm.beginTransaction();
         testRealm.clear(Performance.class);
@@ -54,6 +56,7 @@ public class TimeMeasurement {
         testRealm.commitTransaction();
     }
 
+    //Sets up data. Measures timing for method. Clears Data.
     public void timer(String name, Realm testRealm, int times_to_warm_up, int times_to_execute,
                       TimeUnit timeUnit, ExecutePerformance executePerformance) {
         String fileName_test = name + "_in_" + time_Unit;
@@ -89,6 +92,7 @@ public class TimeMeasurement {
         setStatistics(getFile(fileName_test), name);
     }
 
+    //Creates and writes to file
     public void write(String fileName, String content) {
         try {
             String file_path = "/data/data/io.realm.test/files/" + fileName + ".txt";
@@ -107,17 +111,20 @@ public class TimeMeasurement {
         }
     }
 
+    //Deletes file.
     public void deleteFile(String fileName) {
         String file_path = "/data/data/io.realm.test/files/" + fileName + ".txt";
         File file = new File(file_path);
         file.delete();
     }
 
+    //Fetches file.
     public File getFile(String fileName) {
         File file = new File("/data/data/io.realm.test/files/" + fileName + ".txt");
         return file;
     }
 
+    //Converts tests time to other time unit.
     public long timeConverting(Long time, TimeUnit timeUnit) {
         setTimeUnit(timeUnit);
         switch (timeUnit) {
@@ -160,6 +167,7 @@ public class TimeMeasurement {
 
     }
 
+    //Finds fastest time.
     public double minimum(File file) {
         double current = 0;
         double min = 0;
@@ -182,7 +190,7 @@ public class TimeMeasurement {
         return min;
     }
 
-
+    //Finds longest time.
     public double maximum(File file) {
         double current = 0;
         double max = 0;
@@ -205,6 +213,7 @@ public class TimeMeasurement {
         return max;
     }
 
+    //Calculates average time.
     public double average(File file) {
         double sum = 0;
         int count = 0;
@@ -223,6 +232,7 @@ public class TimeMeasurement {
         return sum / count;
     }
 
+    //Calculates variance.
     public double variance(File file) {
         double avg = average(file);
         double temp = 0;
@@ -244,10 +254,12 @@ public class TimeMeasurement {
         return temp / count;
     }
 
+    //Calculates standard deviation.
     public double stdDev(File file) {
         return Math.sqrt(variance(file));
     }
 
+    //Write Statistics to file.
     public void setStatistics(File file, String name) {
         String fileName = "Statistics_for_" + name + "_in_" + time_Unit;
         deleteFile(fileName);
