@@ -20,19 +20,21 @@ import android.test.AndroidTestCase;
 import java.util.concurrent.TimeUnit;
 
 import io.realm.entities.ExecutePerformance;
-import io.realm.entities.StringOnly;
+import io.realm.entities.Performance;
 import io.realm.entities.TimeMeasurement;
 
 public class RealmPerformanceTest extends AndroidTestCase {
 
     private Realm testRealm;
 
-    private RealmResults<StringOnly> realmResults;
+    private RealmResults<Performance> realmResults;
 
     private int execute_times = 10;
     private int warm_up_times = 10;
 
-    TimeMeasurement timeMeasurement = new TimeMeasurement();
+    private TimeMeasurement timeMeasurement = new TimeMeasurement();
+
+    private TimeUnit timeUnit = TimeUnit.NANOSECONDS;
 
     @Override
     protected void setUp() throws Exception {
@@ -45,14 +47,11 @@ public class RealmPerformanceTest extends AndroidTestCase {
         if (testRealm != null)
             testRealm.close();
     }
-    public void testAddAndClear() {
-        timeMeasurement.testAdd(testRealm);
-    }
 
     //Test for overhead timing
     public void testOverhead() {
         String name = getName();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
 
@@ -60,16 +59,32 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
-    //Test for insert timing.
-    public void testInsert() {
+    //Test for integer insert timing.
+    public void testInsertInteger() {
         String name = getName();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
                 testRealm.beginTransaction();
                 for (int i = 0; i < timeMeasurement.DATA_SIZE; i++) {
-                    StringOnly stringOnly = testRealm.createObject(StringOnly.class);
-                    stringOnly.setChars("a");
+                    Performance performance = testRealm.createObject(Performance.class);
+                    performance.setInteger(3);
+                }
+                testRealm.commitTransaction();
+            }
+        });
+    }
+
+    //Test for string insert timing.
+    public void testInsertString() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                testRealm.beginTransaction();
+                for (int i = 0; i < timeMeasurement.DATA_SIZE; i++) {
+                    Performance performance = testRealm.createObject(Performance.class);
+                    performance.setString("a");
                 }
                 testRealm.commitTransaction();
             }
@@ -77,15 +92,31 @@ public class RealmPerformanceTest extends AndroidTestCase {
     }
 
     //Remove disabled from method name to run this test
-    public void disabledtestInsertMultiCommits() {
+    public void disabledtestInsertIntegerMultiCommits() {
         String name = getName();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.MICROSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
                 for (int i = 0; i < timeMeasurement.DATA_SIZE; i++) {
                     testRealm.beginTransaction();
-                    StringOnly stringOnly = testRealm.createObject(StringOnly.class);
-                    stringOnly.setChars("a");
+                    Performance performance = testRealm.createObject(Performance.class);
+                    performance.setInteger(3);
+                    testRealm.commitTransaction();
+                }
+            }
+        });
+    }
+
+    //Remove disabled from method name to run this test
+    public void disabledtestInsertStringMultiCommits() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                for (int i = 0; i < timeMeasurement.DATA_SIZE; i++) {
+                    testRealm.beginTransaction();
+                    Performance performance = testRealm.createObject(Performance.class);
+                    performance.setString("a");
                     testRealm.commitTransaction();
                 }
             }
@@ -95,10 +126,10 @@ public class RealmPerformanceTest extends AndroidTestCase {
     //Test for query timing
     public void testQuery() {
         String name = getName();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
-                RealmResults<StringOnly> realmResults = testRealm.where(StringOnly.class).contains("chars", "200").findAll();
+                RealmResults<Performance> realmResults = testRealm.where(Performance.class).contains("string", "200").findAll();
             }
         });
     }
@@ -106,10 +137,10 @@ public class RealmPerformanceTest extends AndroidTestCase {
     //Test for size timing
     public void testSize() {
         String name = getName();
-        realmResults = testRealm.allObjects(StringOnly.class);
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
+                realmResults = testRealm.allObjects(Performance.class);
                 realmResults.size();
             }
         });
@@ -118,11 +149,11 @@ public class RealmPerformanceTest extends AndroidTestCase {
     //Test for sorting timing
     public void testSort() {
         String name = getName();
-        realmResults = testRealm.where(StringOnly.class).contains("chars", "test").findAll();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
-                realmResults.sort("chars");
+                realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
+                realmResults.sort("string");
             }
         });
     }
@@ -130,11 +161,11 @@ public class RealmPerformanceTest extends AndroidTestCase {
     //Test for clearing timing
     public void testClear() {
         String name = getName();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
                 testRealm.beginTransaction();
-                testRealm.clear(StringOnly.class);
+                testRealm.clear(Performance.class);
                 testRealm.commitTransaction();
             }
         });
@@ -143,12 +174,12 @@ public class RealmPerformanceTest extends AndroidTestCase {
     //Test for enumerate and access query timing
     public void testEnumerateAndAccessQueryWithForLoop() {
         String name = getName();
-        realmResults = testRealm.where(StringOnly.class).contains("chars", "test").findAll();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
                 for (int i = 0; i < realmResults.size(); i++) {
-                    realmResults.get(i).getChars();
+                    realmResults.get(i).getString();
                 }
             }
         });
@@ -157,43 +188,43 @@ public class RealmPerformanceTest extends AndroidTestCase {
     //Test for enumerate and access query timing
     public void testEnumerateAndAccessQueryWithIterator() {
         String name = getName();
-        realmResults = testRealm.where(StringOnly.class).contains("chars", "test").findAll();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
-                for (StringOnly stringOnly : realmResults) {
-                    stringOnly.getChars();
+                for (Performance performance : realmResults) {
+                    performance.getString();
                 }
             }
         });
     }
 
     // Test for modifying values
-/*    public void testEnumerateAndMutateWithForLoop() {
+    public void testEnumerateAndMutateStringWithForLoop() {
         String name = getName();
-        realmResults = testRealm.allObjects(StringOnly.class);
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times,TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        realmResults = testRealm.allObjects(Performance.class);
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
                 testRealm.beginTransaction();
                 for (int i = 0; i < realmResults.size(); i++) {
-                    realmResults.get(i).setChars("c");
+                    realmResults.get(i).setString("c");
                 }
                 testRealm.commitTransaction();
             }
         });
-    }*/
+    }
 
     //Not working right now
 /*    public void testEnumerateAndMutateWithIterator() {
         String name = getName();
-        realmResults = testRealm.allObjects(StringOnly.class);
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times,TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        realmResults = testRealm.allObjects(Performance.class);
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
                 testRealm.beginTransaction();
-                for (StringOnly stringOnly : realmResults) {
-                    stringOnly.setChars("c");
+                for (Performance Performance : realmResults) {
+                    Performance.setString("c");
                 }
                 testRealm.commitTransaction();
             }
@@ -201,44 +232,101 @@ public class RealmPerformanceTest extends AndroidTestCase {
     }*/
 
     //Test for insert multiple with index
-/*    public void testInsertWithIndex() {
+    public void testInsertStringWithIndex() {
         String name = getName();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
                     @Override
                     public void execute() {
                         testRealm.beginTransaction();
                         for (int i = 0; i < timeMeasurement.DATA_SIZE; i++) {
-                            StringOnly stringOnly = testRealm.createObject(StringOnly.class);
-                            stringOnly.setChars_index("a");
+                            Performance performance = testRealm.createObject(Performance.class);
+                            performance.setString_index("a");
                         }
                         testRealm.commitTransaction();
                     }
                 });
-    }*/
+    }
 
 
     //Test for query with index timing
-/*    public void testQueryWithIndex() {
+    public void testQueryWithIndex() {
         String name = getName();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
-                    RealmResults<StringOnly> realmResults = testRealm.allObjects(StringOnly.class);
+                    RealmResults<Performance> realmResults = testRealm.allObjects(Performance.class);
             }
         });
-    }*/
+    }
 
-    //Test for creating realm timing.
-    //This is not completely accurate since close is called here also.
+    //Test for enumerate and access query timing
+    public void testEnumerateAndAccessQueryWithForLoopIndex() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                realmResults = testRealm.where(Performance.class).contains("string_index", "index").findAll();
+                for (int i = 0; i < realmResults.size(); i++) {
+                    realmResults.get(i).getString_index();
+                }
+            }
+        });
+    }
+
+    //Test for creating and closing realm timing.
     public void testCreateAndClose() {
         String name = getName();
-        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, TimeUnit.NANOSECONDS, new ExecutePerformance() {
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
                 for (int i = 0; i < 50; i++) {
                     Realm realm = Realm.getInstance(getContext());
                     realm.close();
                 }
+            }
+        });
+    }
+
+    public void testMinimum() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                realmResults = testRealm.where(Performance.class).findAll();
+                double min = realmResults.min("integer").doubleValue();
+            }
+        });
+    }
+
+    public void testMaximum() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                realmResults = testRealm.where(Performance.class).findAll();
+                double max = realmResults.max("integer").doubleValue();
+            }
+        });
+    }
+
+    public void testSum() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                realmResults = testRealm.where(Performance.class).findAll();
+                double sum = realmResults.sum("integer").doubleValue();
+            }
+        });
+    }
+
+    public void testAverage() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                realmResults = testRealm.where(Performance.class).findAll();
+                double avg = realmResults.average("integer");
             }
         });
     }

@@ -21,6 +21,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.Thread;
+import java.text.DecimalFormat;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 
@@ -30,11 +32,13 @@ public class TimeMeasurement {
 
     private String time_Unit = "ns";
 
-    public static final int DATA_SIZE = 10000;
+    public static final int DATA_SIZE = 1000;
+
+    private DecimalFormat decimalFormat = new DecimalFormat("##.##");
 
     public void clearRealm(Realm testRealm) {
         testRealm.beginTransaction();
-        testRealm.clear(StringOnly.class);
+        testRealm.clear(Performance.class);
         testRealm.commitTransaction();
     }
 
@@ -42,21 +46,17 @@ public class TimeMeasurement {
     public void addObjectToTestRealm(int objects, Realm testRealm) {
         testRealm.beginTransaction();
         for (int i = 0; i < objects; ++i) {
-            StringOnly stringOnly = testRealm.createObject(StringOnly.class);
-            stringOnly.setChars("test data " + i);
+            Performance performance = testRealm.createObject(Performance.class);
+            performance.setString("test data " + i);
+            performance.setString_index("index data " + i);
+            performance.setInteger(i);
         }
         testRealm.commitTransaction();
     }
 
-    public void testAdd(Realm testRealm) {
-        for (int i = 0; i < 20; i++) {
-            addObjectToTestRealm(DATA_SIZE, testRealm);
-            clearRealm(testRealm);
-        }
-    }
-
-    public void timer(String name, Realm testRealm, int times_to_warm_up, int times_to_execute, TimeUnit timeUnit, ExecutePerformance executePerformance) {
-        String fileName_test = name + "time_in_" + time_Unit;
+    public void timer(String name, Realm testRealm, int times_to_warm_up, int times_to_execute,
+                      TimeUnit timeUnit, ExecutePerformance executePerformance) {
+        String fileName_test = name + "_in_" + time_Unit;
         String fileName_warm_up = "warm_up_" + name + "_in_" + time_Unit;
         deleteFile(fileName_test);
         deleteFile(fileName_warm_up);
@@ -80,6 +80,11 @@ public class TimeMeasurement {
             } else {
             }
             clearRealm(testRealm);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
         setStatistics(getFile(fileName_test), name);
     }
@@ -245,10 +250,11 @@ public class TimeMeasurement {
 
     public void setStatistics(File file, String name) {
         String fileName = "Statistics_for_" + name + "_in_" + time_Unit;
-        write(fileName, String.valueOf(minimum(file)));
-        write(fileName, String.valueOf(maximum(file)));
-        write(fileName, String.valueOf(average(file)));
-        write(fileName, String.valueOf(variance(file)));
-        write(fileName, String.valueOf(stdDev(file)));
+        deleteFile(fileName);
+        write(fileName, String.valueOf(decimalFormat.format(minimum(file))));
+        write(fileName, String.valueOf(decimalFormat.format(maximum(file))));
+        write(fileName, String.valueOf(decimalFormat.format(average(file))));
+        write(fileName, String.valueOf(decimalFormat.format(variance(file))));
+        write(fileName, String.valueOf(decimalFormat.format(stdDev(file))));
     }
 }

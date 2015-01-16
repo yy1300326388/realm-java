@@ -51,14 +51,10 @@ public class TestRealm extends AndroidTestCase {
             stringOnly.setChars("test data " + i);
         }
         testRealm.commitTransaction();
-    }
-
-    public void testAdd() {
-        for (int i = 0; i < 10; i++) {
-            getRealm();
-            addObjectToTestRealm(DATA_SIZE);
-            close();
-            //clearRealm();
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 }
