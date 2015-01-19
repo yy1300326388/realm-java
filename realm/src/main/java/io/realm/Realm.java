@@ -16,8 +16,8 @@
 
 package io.realm;
 
-import android.annotation.TargetApi;
 import android.annotation.SuppressLint;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.os.Handler;
@@ -39,7 +39,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -259,8 +258,11 @@ public final class Realm implements Closeable {
     }
 
     /**
-     * Realm static constructor for the default realm "default.realm".
-     * {link io.realm.close} must be called when you are done using the Realm instance.
+     * Realm static constructor for the default realm "default.realm". This file is stored in the
+     * app's internal storage using Context.getFilesDir(), and does not require any specific
+     * read/write permissions.
+     *
+     * {@link #close()} must be called when you are done using the Realm instance.
      *
      * It sets auto-refresh on if the current thread has a Looper, off otherwise.
      *
@@ -276,8 +278,11 @@ public final class Realm implements Closeable {
     }
 
     /**
-     * Realm static constructor.
-     * {link io.realm.close} must be called when you are done using the Realm instance.
+     * Realm static constructor for a specific realm. The file is stored in the app's internal
+     * storage using Context.getFilesDirs(), and does not require any specific read/write
+     * permissions.
+     *
+     * {@link #close()} must be called when you are done using the Realm instance.
      *
      * It sets auto-refresh on if the current thread has a Looper, off otherwise.
      *
@@ -296,7 +301,8 @@ public final class Realm implements Closeable {
 
     /**
      * Realm static constructor.
-     * {link io.realm.close} must be called when you are done using the Realm instance.
+     *
+     * {@link #close()} must be called when you are done using the Realm instance.
      *
      * It sets auto-refresh on if the current thread has a Looper, off otherwise.
      *
@@ -314,8 +320,11 @@ public final class Realm implements Closeable {
     }
 
     /**
-     * Realm static constructor.
-     * {link io.realm.close} must be called when you are done using the Realm instance.
+     * Realm static constructor for the default realm "default.realm". This file is stored in the
+     * app's internal storage using Context.getFilesDir(), and does not require any specific
+     * read/write permissions.
+     *
+     * {@link #close()} must be called when you are done using the Realm instance.
      *
      * It sets auto-refresh on if the current thread has a Looper, off otherwise.
      *
@@ -333,12 +342,15 @@ public final class Realm implements Closeable {
     }
 
     /**
-     * Realm static constructor.
-     * {link io.realm.close} must be called when you are done using the Realm instance.
+     * Realm static constructor using an open file object. If your app is accessing a Realm file
+     * outside the app's internal storage, you must ensure that the app has proper permissions to
+     * do so.
+     *
+     * {@link #close()} must be called when you are done using the Realm instance.
      *
      * It sets auto-refresh on if the current thread has a Looper, off otherwise.
      *
-     * @param writeableFolder a File object representing a writeable folder
+     * @param writableFolder a File object representing a writable folder
      * @return an instance of the Realm class
      * @throws RealmMigrationNeededException The model classes have been changed and the Realm
      *                                       must be migrated
@@ -346,17 +358,20 @@ public final class Realm implements Closeable {
      * @throws RealmException                Other errors
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static Realm getInstance(File writeableFolder) {
-        return Realm.create(writeableFolder, DEFAULT_REALM_NAME, null);
+    public static Realm getInstance(File writableFolder) {
+        return Realm.create(writableFolder, DEFAULT_REALM_NAME, null);
     }
 
     /**
-     * Realm static constructor.
-     * {link io.realm.close} must be called when you are done using the Realm instance.
+     * Realm static constructor using a folder and a file name. If your app is accessing a Realm file
+     * outside the app's internal storage, you must ensure that the app has proper permissions to
+     * do so.
+     *
+     * {@link #close()} must be called when you are done using the Realm instance.
      *
      * It sets auto-refresh on if the current thread has a Looper, off otherwise.
      *
-     * @param writeableFolder a File object representing a writeable folder
+     * @param writableFolder a File object representing a writable folder
      * @param fileName the name of the Realm file
      * @return an instance of the Realm class
      * @throws RealmMigrationNeededException The model classes have been changed and the Realm
@@ -365,17 +380,20 @@ public final class Realm implements Closeable {
      * @throws RealmException                Other errors
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static Realm getInstance(File writeableFolder, String fileName) {
-        return Realm.create(writeableFolder, fileName, null);
+    public static Realm getInstance(File writableFolder, String fileName) {
+        return Realm.create(writableFolder, fileName, null);
     }
 
     /**
-     * Realm static constructor.
-     * {link io.realm.close} must be called when you are done using the Realm instance.
+     * Realm static constructor using an open file object. If your app is accessing a Realm file
+     * outside the app's internal storage, you must ensure that the app has proper permissions to
+     * do so.
+     *
+     * {@link #close()} must be called when you are done using the Realm instance.
      *
      * It sets auto-refresh on if the current thread has a Looper, off otherwise.
      *
-     * @param writeableFolder a File object representing a writeable folder
+     * @param writableFolder a File object representing a writable folder
      * @param key     a 64-byte encryption key
      * @return an instance of the Realm class
      * @throws RealmMigrationNeededException The model classes have been changed and the Realm
@@ -384,17 +402,20 @@ public final class Realm implements Closeable {
      * @throws RealmException                Other errors
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static Realm getInstance(File writeableFolder, byte[] key) {
-        return Realm.create(writeableFolder, DEFAULT_REALM_NAME, key);
+    public static Realm getInstance(File writableFolder, byte[] key) {
+        return Realm.create(writableFolder, DEFAULT_REALM_NAME, key);
     }
 
     /**
-     * Realm static constructor.
-     * {link io.realm.close} must be called when you are done using the Realm instance.
+     * Realm static constructor using a folder and file name. If your app is accessing a Realm file
+     * outside the app's internal storage, you must ensure that the app has proper permissions to
+     * do so..
+     *
+     * {@link #close()} must be called when you are done using the Realm instance.
      *
      * It sets auto-refresh on if the current thread has a Looper, off otherwise.
      *
-     * @param writeableFolder a File object representing a writeable folder
+     * @param writableFolder a File object representing a writable folder
      * @param fileName the name of the Realm file
      * @param key     a 64-byte encryption key
      * @return an instance of the Realm class
@@ -404,8 +425,8 @@ public final class Realm implements Closeable {
      * @throws RealmException                Other errors
      */
     @SuppressWarnings("UnusedDeclaration")
-    public static Realm getInstance(File writeableFolder, String fileName, byte[] key) {
-        return Realm.create(writeableFolder, fileName, key);
+    public static Realm getInstance(File writableFolder, String fileName, byte[] key) {
+        return Realm.create(writableFolder, fileName, key);
     }
 
     private static Realm create(File writableFolder, String filename, byte[] key) {
