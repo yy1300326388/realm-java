@@ -26,6 +26,7 @@ public class Dog extends RealmObject {
 
     @Index
     private String name;
+    @Index
     private long age;
     private float height;
     private double weight;

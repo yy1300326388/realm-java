@@ -1056,4 +1056,38 @@ public class RealmTest extends AndroidTestCase {
         }
     }
 
+    public void testDistinct() {
+        testRealm.beginTransaction();
+        testRealm.clear(Dog.class);
+        for (int i = 0; i < 10; ++i) {
+            Dog dog = testRealm.createObject(Dog.class);
+            if (i % 2 == 0) {
+                dog.setName("Rex");
+            } else {
+                dog.setName("King");
+            }
+            dog.setAge(i % 2);
+        }
+        testRealm.commitTransaction();
+
+        RealmResults<Dog> dogs1 = testRealm.distinct(Dog.class, "name");
+        assertEquals(2, dogs1.size());
+
+        //RealmResults<Dog> dogs2 = testRealm.distinct(Dog.class, "age");
+        //assertEquals(2, dogs2.size());
+
+        // Verify exception is thrown if the field in not indexed.
+        try {
+            RealmResults<Dog> dogs = testRealm.distinct(Dog.class, "height");
+            fail();
+        } catch (UnsupportedOperationException ignore) {
+        }
+
+        // Verify exception us throw if wrong type
+        try {
+            RealmResults<Dog> dogs3 = testRealm.distinct(Dog.class, "owner");
+            fail();
+        } catch (UnsupportedOperationException ignore) {
+        }
+    }
 }

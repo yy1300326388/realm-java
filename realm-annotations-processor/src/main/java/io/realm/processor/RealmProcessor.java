@@ -111,12 +111,15 @@ public class RealmProcessor extends AbstractProcessor {
 
                     if (variableElement.getAnnotation(Index.class) != null) {
                         // The field has the @Index annotation. It's only valid for:
-                        // * String
+                        // * String, Date, integer, boolean
                         String elementTypeCanonicalName = variableElement.asType().toString();
-                        if (elementTypeCanonicalName.equals("java.lang.String")) {
+                        if (elementTypeCanonicalName.equals("java.lang.String") ||
+                                elementTypeCanonicalName.equals("long") ||
+                                elementTypeCanonicalName.equals("boolean") ||
+                                elementTypeCanonicalName.equals("java.lang.Date")) {
                             indexedFields.add(variableElement);
                         } else {
-                            error("@Index is only applicable to String fields - got " + element);
+                            error("@Index is only applicable to boolean, integer, Date, and String fields - got " + element);
                             return true;
                         }
                     }

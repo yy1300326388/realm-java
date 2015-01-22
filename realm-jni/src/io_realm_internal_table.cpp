@@ -731,13 +731,20 @@ JNIEXPORT void JNICALL Java_io_realm_internal_Table_nativeSetIndex(
     Table* pTable = TBL(nativeTablePtr);
     if (!TBL_AND_COL_INDEX_VALID(env, pTable, columnIndex))
         return;
-    if (pTable->get_column_type (S(columnIndex)) != type_String) {
-        ThrowException(env, IllegalArgument, "Invalid columntype - only string columns are supported at the moment.");
-        return;
+    int colType = pTable->get_column_type( S(columnIndex) );
+    switch (colType) {
+        case type_Bool:
+        case type_Int:
+        case type_DateTime:
+        case type_String:
+            try {
+                pTable->add_search_index( S(columnIndex));
+            } CATCH_STD()
+            break;
+        default:
+            ThrowException(env, IllegalArgument, "Invalid type - only boolean, integer, Date, and String are supported.");
+            break;
     }
-    try {
-        pTable->add_search_index( S(columnIndex));
-    } CATCH_STD()
 }
 
 JNIEXPORT jboolean JNICALL Java_io_realm_internal_Table_nativeHasIndex(
@@ -1185,17 +1192,25 @@ JNIEXPORT jlong JNICALL Java_io_realm_internal_Table_nativeGetDistinctView(
     if (!TBL_AND_COL_INDEX_VALID(env, pTable, columnIndex))
         return 0;
     if (!pTable->has_search_index(S(columnIndex))) {
-        ThrowException(env, UnsupportedOperation, "The column must be indexed before distinct() can be used.");
+        ThrowException(env, UnsupportedOperation, "Must be indexed before distinct() can be used.");
         return 0;
     }
-    if (pTable->get_column_type(S(columnIndex)) != type_String) {
-        ThrowException(env, IllegalArgument, "Invalid columntype - only string columns are supported.");
-        return 0;
+
+    int colType = pTable->get_column_type( S(columnIndex) );
+    switch (colType) {
+        case type_Bool:
+        case type_Int:
+        case type_DateTime:
+        case type_String:
+            try {
+                TableView* pTableView = new TableView( pTable->get_distinct_view(S(columnIndex)) );
+                return reinterpret_cast<jlong>(pTableView);        
+            } CATCH_STD()
+            break;
+        default:
+            ThrowException(env, IllegalArgument, "Invalid type - only boolean, integer, Date, and String are supported.");
+            return 0;
     }
-    try {
-        TableView* pTableView = new TableView( pTable->get_distinct_view(S(columnIndex)) );
-        return reinterpret_cast<jlong>(pTableView);
-    } CATCH_STD()
     return 0;
 }
 

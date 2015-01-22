@@ -1021,7 +1021,8 @@ public class Table implements TableOrView, TableSchema, Closeable {
 
     public void setIndex(long columnIndex) {
         checkImmutable();
-        if (getColumnType(columnIndex) != ColumnType.STRING)
+        ColumnType colType = getColumnType(columnIndex);
+        if (colType == ColumnType.LINK || colType == ColumnType.LINK_LIST || colType == ColumnType.MIXED || colType == ColumnType.TABLE)
             throw new IllegalArgumentException("Index is only supported on string columns.");
         nativeSetIndex(nativePtr, columnIndex);
     }
