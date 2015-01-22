@@ -25,13 +25,6 @@ import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
-
 import io.realm.entities.AllTypes;
 
 public class MultiRealms extends AndroidTestCase {
@@ -157,7 +150,6 @@ public class MultiRealms extends AndroidTestCase {
                     double mSec = ((double) (stop - start) / 1000000.0);
                     write(file, decimalFormat.format(mSec));
                 }
-                sendMail(file);
             }
         };
 
@@ -200,16 +192,14 @@ public class MultiRealms extends AndroidTestCase {
             String file_path = getContext().getFilesDir().getAbsolutePath() + "/" + fileName + ".dat";
 
             File file = new File(file_path);
-            if (!file.exists()) {
-                file.createNewFile();
-                FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-                BufferedWriter bw = new BufferedWriter(fw);
-                bw.write("##;##\n" +
-                        "@LiveGraph demo file.\n" +
-                        "Time");
-                bw.newLine();
-                bw.close();
-            }
+            file.createNewFile();
+            FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+            BufferedWriter bw = new BufferedWriter(fw);
+            bw.write("##;##\n" +
+                    "@LiveGraph demo file.\n" +
+                    "Time");
+            bw.newLine();
+            bw.close();
             return file;
         } catch (IOException e) {
             e.printStackTrace();
@@ -227,7 +217,7 @@ public class MultiRealms extends AndroidTestCase {
     public void writeNoClose(File file, String content) {
         try {
             FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-            BufferedWriter bw = new BufferedWriter(fw, 1024*1024);
+            BufferedWriter bw = new BufferedWriter(fw, 1024 * 1024);
             bw.write(content);
             bw.newLine();
         } catch (IOException e) {
@@ -244,42 +234,6 @@ public class MultiRealms extends AndroidTestCase {
             bw.close();
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-/*    public void sendFile(File file) {
-        Intent intent = new Intent(Intent.ACTION_SEND);
-        intent.putExtra(Intent.EXTRA_SUBJECT, "Test single attachment");
-        intent.putExtra(Intent.EXTRA_EMAIL, new String[]{"benjaminprakash88@gmail.com"});
-        intent.putExtra(Intent.EXTRA_TEXT, "Mail with an attachment");
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-        intent.putExtra(Intent.EXTRA_STREAM, Uri.fromFile(file));
-        intent.setType("text/plain");
-        mContext.startActivity(intent);
-    }*/
-
-    public void sendMail(File file) {
-        // Set up the SMTP server.
-        java.util.Properties props = new java.util.Properties();
-        props.put("mail.smtp.host", "smtp.myisp.com");
-        Session session = Session.getDefaultInstance(props, null);
-
-// Construct the message
-        String to = "benjaminprakash88@gmail.com";
-        String from = "me@me.com";
-        String subject = "Hello";
-        Message msg = new MimeMessage(session);
-        try {
-            msg.setFrom(new InternetAddress(from));
-            msg.setRecipient(Message.RecipientType.TO, new InternetAddress(to));
-            msg.setSubject(subject);
-            msg.setText("Hi,\n\nHow are you?");
-
-            // Send the message.
-            Transport.send(msg);
-        } catch (MessagingException e) {
-            // Error.
         }
     }
 }

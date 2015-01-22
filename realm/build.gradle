@@ -33,7 +33,6 @@ android {
 }
 dependencies {
     compile 'com.intellij:annotations:+@jar'
-    compile 'javax.mail:javax.mail-api:1.5.2'
     compile files("../realm-annotations/build/libs/realm-annotations-${version}.jar")
     androidTestApt files("../realm-annotations-processor/build/libs/realm-annotations-processor-${version}.jar")
     androidTestApt files("../realm-annotations/build/libs/realm-annotations-${version}.jar")
