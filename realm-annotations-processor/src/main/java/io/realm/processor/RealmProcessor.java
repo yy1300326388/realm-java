@@ -115,11 +115,14 @@ public class RealmProcessor extends AbstractProcessor {
                         String elementTypeCanonicalName = variableElement.asType().toString();
                         if (elementTypeCanonicalName.equals("java.lang.String") ||
                                 elementTypeCanonicalName.equals("long") ||
+                                elementTypeCanonicalName.equals("int") ||
+                                elementTypeCanonicalName.equals("short") ||
                                 elementTypeCanonicalName.equals("boolean") ||
-                                elementTypeCanonicalName.equals("java.lang.Date")) {
+                                elementTypeCanonicalName.equals("java.util.Date")) {
                             indexedFields.add(variableElement);
                         } else {
-                            error("@Index is only applicable to boolean, integer, Date, and String fields - got " + element);
+                            error("@Index is only applicable to boolean, integer, Date, and String fields - got "
+                                    + element + " (" + elementTypeCanonicalName.toString() + ")");
                             return true;
                         }
                     }

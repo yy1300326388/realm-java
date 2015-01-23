@@ -350,7 +350,10 @@ public class JNITableTest extends AndroidTestCase {
         for (long colIndex = 0; colIndex < t.getColumnCount(); colIndex++) {
 
             // Check all other column types than String throws exception when using setIndex()/hasIndex()
-            boolean exceptionExpected = (t.getColumnType(colIndex) != ColumnType.STRING);
+            boolean exceptionExpected = (t.getColumnType(colIndex) != ColumnType.STRING
+                    && t.getColumnType(colIndex) != ColumnType.BOOLEAN
+                    && t.getColumnType(colIndex) != ColumnType.DATE
+                    && t.getColumnType(colIndex) != ColumnType.INTEGER);
 
             // Try to setIndex()
             try {
