@@ -35,7 +35,7 @@ public class TimeMeasurement {
     //Size of data for testing.
     public static final int DATA_SIZE = 1000;
 
-    private DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    private DecimalFormat decimalFormat = new DecimalFormat("##.###");
 
     //Clears data from realm.
     public void clearRealm(Realm testRealm) {
@@ -59,6 +59,7 @@ public class TimeMeasurement {
     //Sets up data. Measures timing for method. Clears Data.
     public void timer(String name, Realm testRealm, int times_to_warm_up, int times_to_execute,
                       TimeUnit timeUnit, ExecutePerformance executePerformance) {
+        setTimeUnit(timeUnit);
         String fileName_test = name + "_in_" + time_Unit;
         String fileName_warm_up = "warm_up_" + name + "_in_" + time_Unit;
         deleteFile(fileName_test);
@@ -69,16 +70,16 @@ public class TimeMeasurement {
             long start = System.nanoTime();
             executePerformance.execute();
             long stop = System.nanoTime();
-            long time = stop - start;
+            double time = ((double) (stop - start) / 1.0);
             if (time != 0) {
                 if (timeUnit != TimeUnit.NANOSECONDS) {
-                    time = timeConverting(time, timeUnit);
+                    time = timeConverting(stop, start, timeUnit);
                 }
 
                 if (i < times_to_warm_up) {
-                    write(fileName_warm_up, String.valueOf(time));
+                    write(fileName_warm_up, decimalFormat.format(time));
                 } else {
-                    write(fileName_test, String.valueOf(time));
+                    write(fileName_test, decimalFormat.format(time));
                 }
             } else {
             }
@@ -125,19 +126,19 @@ public class TimeMeasurement {
     }
 
     //Converts tests time to other time unit.
-    public long timeConverting(Long time, TimeUnit timeUnit) {
-        setTimeUnit(timeUnit);
+    public double timeConverting(long stop, long start, TimeUnit timeUnit) {
+        double time = 0;
         switch (timeUnit) {
             case MICROSECONDS: {
-                time = TimeUnit.MICROSECONDS.convert(time, TimeUnit.NANOSECONDS);
+                 time = (double)(stop - start) / 1000.0;
             }
             break;
             case MILLISECONDS: {
-                time = TimeUnit.MILLISECONDS.convert(time, TimeUnit.NANOSECONDS);
+                time = ((double) stop / 1000000.0) - ((double) start/ 1000000.0);
             }
             break;
             case SECONDS: {
-                time = TimeUnit.SECONDS.convert(time, TimeUnit.NANOSECONDS);
+                time = (double)(stop - start) / 1000000000.0;
             }
             break;
 
@@ -259,6 +260,15 @@ public class TimeMeasurement {
         return Math.sqrt(variance(file));
     }
 
+    //Calculates the highest percent difference.
+    public double minMaxPercentDifference(File file) {
+        double min = minimum(file);
+        double max = maximum(file);
+        double percent = ((max - min) / min) *100.0;
+
+        return percent;
+    }
+
     //Write Statistics to file.
     public void setStatistics(File file, String name) {
         String fileName = "Statistics_for_" + name + "_in_" + time_Unit;
@@ -268,5 +278,6 @@ public class TimeMeasurement {
         write(fileName, String.valueOf(decimalFormat.format(average(file))));
         write(fileName, String.valueOf(decimalFormat.format(variance(file))));
         write(fileName, String.valueOf(decimalFormat.format(stdDev(file))));
+        write(fileName, String.valueOf(decimalFormat.format(minMaxPercentDifference(file))) + "%");
     }
 }
