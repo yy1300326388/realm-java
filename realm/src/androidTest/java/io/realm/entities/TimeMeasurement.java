@@ -81,7 +81,6 @@ public class TimeMeasurement {
                 } else {
                     write(fileName_test, decimalFormat.format(time));
                 }
-            } else {
             }
             clearRealm(testRealm);
             try {
@@ -96,11 +95,18 @@ public class TimeMeasurement {
     //Creates and writes to file
     public void write(String fileName, String content) {
         try {
-            String file_path = "/data/data/io.realm.test/files/" + fileName + ".txt";
+            String file_path = "/data/data/io.realm.test/files/" + fileName + ".dat";
             File file = new File(file_path);
 
             if (!file.exists()) {
                 file.createNewFile();
+                FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+                BufferedWriter bw = new BufferedWriter(fw);
+                bw.write("##;###\n" +
+                        "@LiveGraph demo file.\n" +
+                        "Time");
+                bw.newLine();
+                bw.close();
             }
             FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -114,14 +120,14 @@ public class TimeMeasurement {
 
     //Deletes file.
     public void deleteFile(String fileName) {
-        String file_path = "/data/data/io.realm.test/files/" + fileName + ".txt";
+        String file_path = "/data/data/io.realm.test/files/" + fileName + ".dat";
         File file = new File(file_path);
         file.delete();
     }
 
     //Fetches file.
     public File getFile(String fileName) {
-        File file = new File("/data/data/io.realm.test/files/" + fileName + ".txt");
+        File file = new File("/data/data/io.realm.test/files/" + fileName + ".dat");
         return file;
     }
 
@@ -130,7 +136,7 @@ public class TimeMeasurement {
         double time = 0;
         switch (timeUnit) {
             case MICROSECONDS: {
-                 time = (double)(stop - start) / 1000.0;
+                time = ((double) stop / 1000.0) - ((double) start/ 1000.0);
             }
             break;
             case MILLISECONDS: {
@@ -138,7 +144,7 @@ public class TimeMeasurement {
             }
             break;
             case SECONDS: {
-                time = (double)(stop - start) / 1000000000.0;
+                time = ((double) stop / 1000000000.0) - ((double) start/ 1000000000.0);
             }
             break;
 
@@ -175,6 +181,9 @@ public class TimeMeasurement {
         try {
             Scanner scanner = new Scanner(file);
             try {
+                for (int i = 0; i < 3; i ++){
+                    scanner.nextLine();
+                }
                 min = Double.valueOf(scanner.nextLine());
                 while (scanner.hasNextLine()) {
                     current = Double.valueOf(scanner.nextLine());
@@ -197,6 +206,9 @@ public class TimeMeasurement {
         double max = 0;
         try {
             Scanner scanner = new Scanner(file);
+            for (int i = 0; i < 3; i ++){
+                scanner.nextLine();
+            }
             max = Double.valueOf(scanner.nextLine());
             try {
                 max = Double.valueOf(scanner.nextLine());
@@ -220,6 +232,9 @@ public class TimeMeasurement {
         int count = 0;
         try {
             Scanner scanner = new Scanner(file);
+            for (int i = 0; i < 3; i ++){
+                scanner.nextLine();
+            }
             try {
                 while (scanner.hasNextLine()) {
                     sum += Double.valueOf(scanner.nextLine());
@@ -241,6 +256,9 @@ public class TimeMeasurement {
         int count = 0;
         try {
             Scanner scanner = new Scanner(file);
+            for (int i = 0; i < 3; i ++){
+                scanner.nextLine();
+            }
             try {
                 while (scanner.hasNextLine()) {
                     current = Double.valueOf(scanner.nextLine());
