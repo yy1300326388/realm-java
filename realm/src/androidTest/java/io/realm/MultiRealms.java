@@ -16,20 +16,24 @@
 
 package io.realm;
 
+import android.database.sqlite.SQLiteDatabase;
+import android.os.Environment;
 import android.test.AndroidTestCase;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.lang.Thread;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 
-import io.realm.entities.AllTypes;
+import io.realm.entities.*;
 
 public class MultiRealms extends AndroidTestCase {
 
     private DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    private final Boolean isInternal = true;
 
     @Override
     protected void setUp() throws Exception {
@@ -52,13 +56,24 @@ public class MultiRealms extends AndroidTestCase {
         realm.commitTransaction();
     }
 
+    public void insertSQLite(int objects, SQLiteDatabase db) {
+
+        // Inserting Row
+        for (int i = 0; i < objects; i++) {
+            db.execSQL("INSERT INTO "
+                    + "test"
+                    + " (string)"
+                    + " VALUES ('" + i + "')");
+    }
+}
+
     public void testRealms() {
 
         Thread thread1 = new Thread() {
             public void run() {
                 Realm realm1 = Realm.getInstance(getContext(), "default1.realm");
                 addObjectToRealm(50, realm1);
-                File file = createFile("realm1");
+                File file = createFile("realm1", isInternal);
                 for (int i = 0; i < 250; i++) {
                     for (int j = 0; j < 50; j++) {
                         long start = System.nanoTime();
@@ -82,7 +97,7 @@ public class MultiRealms extends AndroidTestCase {
             public void run() {
                 Realm realm2 = Realm.getInstance(getContext(), "default2.realm");
                 addObjectToRealm(50, realm2);
-                File file = createFile("realm2");
+                File file = createFile("realm2", isInternal);
                 for (int i = 0; i < 250; i++) {
                     for (int j = 0; j < 50; j++) {
                         long start = System.nanoTime();
@@ -106,8 +121,8 @@ public class MultiRealms extends AndroidTestCase {
             public void run() {
                 Realm realm2 = Realm.getInstance(getContext(), "default3.realm");
                 addObjectToRealm(50, realm2);
-                File file = createFile("realm3");
-                for (int i = 0; i < 500; i++) {
+                File file = createFile("realm3", isInternal);
+                for (int i = 0; i < 12500; i++) {
                     long start = System.nanoTime();
                     realm2.beginTransaction();
                     realm2.allObjects(AllTypes.class).get(1).setColumnString("new dummy data " + i);
@@ -120,11 +135,12 @@ public class MultiRealms extends AndroidTestCase {
             }
         };
 
+
         Thread thread4 = new Thread() {
             public void run() {
                 ArrayList<Double> times = new ArrayList<Double>();
-                File dummy_file = createFile("dummy");
-                File file = createFile("normal_write");
+                File dummy_file = createFile("dummy", true);
+                File file = createFile("normal_write", isInternal);
                 for (int i = 0; i < 12500; i++) {
                     long start = System.nanoTime();
                     writeNoClose(dummy_file, String.valueOf(i));
@@ -140,9 +156,8 @@ public class MultiRealms extends AndroidTestCase {
 
         Thread thread5 = new Thread() {
             public void run() {
-                ArrayList<Double> times = new ArrayList<Double>();
-                File dummy_file = createFile("dummy2");
-                File file = createFile("normal_write_close");
+                File dummy_file = createFile("dummy2", true);
+                File file = createFile("normal_write_close", isInternal);
                 for (int i = 0; i < 12500; i++) {
                     long start = System.nanoTime();
                     write(dummy_file, String.valueOf(i));
@@ -153,11 +168,32 @@ public class MultiRealms extends AndroidTestCase {
             }
         };
 
+        Thread thread6 = new Thread() {
+            public void run() {
+                MySQLiteHelper mySQLiteHelper;
+                mySQLiteHelper = new MySQLiteHelper(getContext());
+                SQLiteDatabase db = mySQLiteHelper.getWritableDatabase();
+                mySQLiteHelper.dropTable(db);
+                mySQLiteHelper.onCreate(db);
+                insertSQLite(50, db);
+                File file = createFile("SQLite", isInternal);
+                for (int i = 0; i < 12500; i++) {
+                    long start = System.nanoTime();
+                    db.execSQL("UPDATE test SET string = '" + i +"' WHERE string = '1';");
+                    long stop = System.nanoTime();
+                    double mSec = ((double) (stop - start) / 1000000.0);
+                    write(file, decimalFormat.format(mSec));
+                }
+                db.close();
+            }
+        };
+
         //thread1.start();
         //thread2.start();
         //thread3.start();
         //thread4.start();
-        thread5.start();
+        //thread5.start();
+        //thread6.start();
 
         try {
             thread1.join();
@@ -184,13 +220,22 @@ public class MultiRealms extends AndroidTestCase {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        try {
+            thread6.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
-    public File createFile(String fileName) {
-        deleteFile(fileName);
+    public File createFile(String fileName, Boolean isInternal) {
+        deleteFile(fileName, isInternal);
         try {
-            String file_path = getContext().getFilesDir().getAbsolutePath() + "/" + fileName + ".dat";
-
+            String file_path = "";
+            if(isInternal == true) {
+                file_path = getContext().getFilesDir().getAbsolutePath() + "/" + fileName + ".dat";
+            } else {
+                file_path = Environment.getExternalStorageDirectory() + "/" + fileName + ".dat";
+            }
             File file = new File(file_path);
             file.createNewFile();
             FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
@@ -208,8 +253,13 @@ public class MultiRealms extends AndroidTestCase {
         return null;
     }
 
-    public void deleteFile(String fileName) {
-        String file_path = getContext().getFilesDir().getAbsolutePath() + "/" + fileName + ".dat";
+    public void deleteFile(String fileName, Boolean isInternal) {
+        String file_path = "";
+        if ( isInternal == true) {
+            file_path = getContext().getFilesDir().getAbsolutePath() + "/" + fileName + ".dat";
+        } else {
+            file_path = Environment.getExternalStorageDirectory() + "/" + fileName + ".dat";
+        }
         File file = new File(file_path);
         file.delete();
     }
