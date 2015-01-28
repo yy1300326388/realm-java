@@ -21,7 +21,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.lang.Thread;
 import java.text.DecimalFormat;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +32,7 @@ public class TimeMeasurement {
     private String time_Unit = "ns";
 
     //Size of data for testing.
-    public static final int DATA_SIZE = 1000;
+    public static final int DATA_SIZE = 10000;
 
     private DecimalFormat decimalFormat = new DecimalFormat("##.###");
 
@@ -44,14 +43,28 @@ public class TimeMeasurement {
         testRealm.commitTransaction();
     }
 
-    //Creates data for realm with argument size
-    public void addObjectToTestRealm(int objects, Realm testRealm) {
+    //Creates performance objects data.
+    public void addPerformanceObjects(int objects, Realm testRealm) {
         testRealm.beginTransaction();
-        for (int i = 0; i < objects; ++i) {
+        for (int i = 0; i < objects; i++) {
             Performance performance = testRealm.createObject(Performance.class);
             performance.setString("test data " + i);
             performance.setString_index("index data " + i);
             performance.setInteger(i);
+        }
+        testRealm.commitTransaction();
+    }
+
+    //Creates performance objects data.
+    public void addAllTypesObjects(int objects, Realm testRealm) {
+        testRealm.beginTransaction();
+        for (int i = 0; i < objects; i++) {
+                AllTypes allTypes = testRealm.createObject(AllTypes.class);
+                allTypes.setColumnBoolean((i % 2) == 0);
+                allTypes.setColumnDouble(3.1415 + i);
+                allTypes.setColumnFloat(1.234567f + i);
+                allTypes.setColumnString("test data " + i);
+                allTypes.setColumnLong(i);
         }
         testRealm.commitTransaction();
     }
@@ -62,11 +75,14 @@ public class TimeMeasurement {
         setTimeUnit(timeUnit);
         String fileName_test = name + "_in_" + time_Unit;
         String fileName_warm_up = "warm_up_" + name + "_in_" + time_Unit;
-        deleteFile(fileName_test);
-        deleteFile(fileName_warm_up);
+        deleteDir(name);
 
         for (int i = 0; i < times_to_execute + times_to_warm_up; i++) {
-            addObjectToTestRealm(DATA_SIZE, testRealm);
+            if(!name.equals("testQueryConstruction")) {
+                addPerformanceObjects(DATA_SIZE, testRealm);
+            } else {
+                addAllTypesObjects(DATA_SIZE, testRealm);
+            }
             long start = System.nanoTime();
             executePerformance.execute();
             long stop = System.nanoTime();
@@ -77,25 +93,26 @@ public class TimeMeasurement {
                 }
 
                 if (i < times_to_warm_up) {
-                    write(fileName_warm_up, decimalFormat.format(time));
+                    write(name, fileName_warm_up, decimalFormat.format(time));
                 } else {
-                    write(fileName_test, decimalFormat.format(time));
+                    write(name, fileName_test, decimalFormat.format(time));
                 }
             }
             clearRealm(testRealm);
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
         }
-        setStatistics(getFile(fileName_test), name);
+        setStatistics(getFile(name), name);
     }
 
     //Creates and writes to file
-    public void write(String fileName, String content) {
+    public void write(String dirName, String fileName, String content) {
         try {
-            String file_path = "/data/data/io.realm.test/files/" + fileName + ".dat";
+            String dir_path = "/data/data/io.realm.test/files/" + dirName;
+            String file_path = dir_path + "/" + fileName + ".dat";
+            File dir = new File(dir_path);
+            if (!dir.exists()) {
+                dir.mkdir();
+            }
+
             File file = new File(file_path);
 
             if (!file.exists()) {
@@ -119,15 +136,20 @@ public class TimeMeasurement {
     }
 
     //Deletes file.
-    public void deleteFile(String fileName) {
-        String file_path = "/data/data/io.realm.test/files/" + fileName + ".dat";
-        File file = new File(file_path);
-        file.delete();
+    public void deleteDir(String name) {
+
+        File dir = new File("/data/data/io.realm.test/files/" + name);
+        if (dir.isDirectory()) {
+            String[] children = dir.list();
+            for (int i = 0; i < children.length; i++) {
+                new File(dir, children[i]).delete();
+            }
+        }
     }
 
     //Fetches file.
-    public File getFile(String fileName) {
-        File file = new File("/data/data/io.realm.test/files/" + fileName + ".dat");
+    public File getFile(String name) {
+        File file = new File("/data/data/io.realm.test/files/" + name + "/" + name + "_in_" + time_Unit + ".dat");
         return file;
     }
 
@@ -290,12 +312,11 @@ public class TimeMeasurement {
     //Write Statistics to file.
     public void setStatistics(File file, String name) {
         String fileName = "Statistics_for_" + name + "_in_" + time_Unit;
-        deleteFile(fileName);
-        write(fileName, String.valueOf(decimalFormat.format(minimum(file))));
-        write(fileName, String.valueOf(decimalFormat.format(maximum(file))));
-        write(fileName, String.valueOf(decimalFormat.format(average(file))));
-        write(fileName, String.valueOf(decimalFormat.format(variance(file))));
-        write(fileName, String.valueOf(decimalFormat.format(stdDev(file))));
-        write(fileName, String.valueOf(decimalFormat.format(minMaxPercentDifference(file))) + "%");
+        write(name, fileName, String.valueOf(decimalFormat.format(minimum(file))));
+        write(name, fileName, String.valueOf(decimalFormat.format(maximum(file))));
+        write(name, fileName, String.valueOf(decimalFormat.format(average(file))));
+        write(name, fileName, String.valueOf(decimalFormat.format(variance(file))));
+        write(name, fileName, String.valueOf(decimalFormat.format(stdDev(file))));
+        write(name, fileName, String.valueOf(decimalFormat.format(minMaxPercentDifference(file))) + "%");
     }
 }

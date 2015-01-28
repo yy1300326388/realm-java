@@ -19,6 +19,7 @@ import android.test.AndroidTestCase;
 
 import java.util.concurrent.TimeUnit;
 
+import io.realm.entities.AllTypes;
 import io.realm.entities.ExecutePerformance;
 import io.realm.entities.Performance;
 import io.realm.entities.TimeMeasurement;
@@ -42,7 +43,7 @@ public class RealmPerformanceTest extends AndroidTestCase {
     private TimeMeasurement timeMeasurement = new TimeMeasurement();
 
     //Sets time unit for time in tests.
-    private TimeUnit timeUnit = TimeUnit.NANOSECONDS;
+    private TimeUnit timeUnit = TimeUnit.MILLISECONDS;
 
     @Override
     protected void setUp() throws Exception {
@@ -142,6 +143,20 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
+    //Test for query construction timing.
+    public void testQueryConstruction() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                RealmResults<AllTypes> realmResults = testRealm.where(AllTypes.class).beginGroup()
+                        .equalTo("columnBoolean", false).between("columnLong", 2000, 3000).or()
+                        .contains("columnString", "data 000").greaterThanOrEqualTo("columnFloat", 3000.1111f).or()
+                        .lessThan("columnDouble", 200.05).notEqualTo("columnBoolean", false).endGroup().findAll();
+            }
+        });
+    }
+
     //Test for size timing.
     public void testSize() {
         String name = getName();
@@ -206,8 +221,8 @@ public class RealmPerformanceTest extends AndroidTestCase {
             }
         });
     }
-
-    //Test for enumerating modifying values with for loop timing.
+        //not working now
+/*    //Test for enumerating modifying values with for loop timing.
     public void testEnumerateAndMutateStringWithForLoop() {
         String name = getName();
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
@@ -221,7 +236,23 @@ public class RealmPerformanceTest extends AndroidTestCase {
                 testRealm.commitTransaction();
             }
         });
-    }
+    }*/
+
+/*    //Test for enumerating modifying values with for loop timing.
+    public void testEnumerateAndMutateStringWithForLoop() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                //realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
+                testRealm.beginTransaction();
+                for (int i = 0; i < testRealm.allObjects(Performance.class).size(); i++) {
+                    testRealm.allObjects(Performance.class).get(i).setString("c");
+                }
+                testRealm.commitTransaction();
+            }
+        });
+    }*/
 
     //Not working right now.
     //Test for enumerating modifying values with iterator timing.
