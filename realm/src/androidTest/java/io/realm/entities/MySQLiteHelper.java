@@ -14,7 +14,8 @@ public class MySQLiteHelper extends SQLiteOpenHelper {
     // Database creation sql statement
     private static final String CREATE_TABLE_TEST = "CREATE TABLE "
             + TABLE_NAME + "(" + "string"
-            + " text not null" + ")";
+            + " text not null, " + "integer"
+            + " int null" + ")";
 
     public MySQLiteHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);

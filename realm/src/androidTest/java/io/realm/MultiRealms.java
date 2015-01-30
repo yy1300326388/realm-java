@@ -33,6 +33,7 @@ import io.realm.entities.MySQLiteHelper;
 public class MultiRealms extends AndroidTestCase {
 
     private DecimalFormat decimalFormat = new DecimalFormat("#.##");
+    //decides where to save .dat file. true if emulator or can access data/data, false if sd card.
     private final Boolean isInternal = true;
 
     @Override
@@ -50,26 +51,24 @@ public class MultiRealms extends AndroidTestCase {
             allTypes.setColumnBoolean((i % 2) == 0);
             allTypes.setColumnDouble(1.337);
             allTypes.setColumnFloat(0.1337f + i);
-            allTypes.setColumnString("dummy data " + i);
+            allTypes.setColumnString("data " + i);
             allTypes.setColumnLong(i);
         }
         realm.commitTransaction();
     }
 
     public void insertSQLite(int objects, SQLiteDatabase db) {
-
-        // Inserting Row
         for (int i = 0; i < objects; i++) {
             db.execSQL("INSERT INTO "
                     + "test"
-                    + " (string)"
-                    + " VALUES ('" + i + "')");
+                    + " (string, integer)"
+                    + " VALUES ('" + i + "', " + i + ")");
         }
     }
 
     public void testRealms() {
 
-        Thread thread1 = new Thread() {
+        final Thread thread1 = new Thread() {
             public void run() {
                 Realm realm1 = Realm.getInstance(getContext(), "default1.realm");
                 addObjectToRealm(50, realm1);
@@ -81,7 +80,7 @@ public class MultiRealms extends AndroidTestCase {
                         realm1.allObjects(AllTypes.class).get(j).setColumnBoolean(false);
                         realm1.allObjects(AllTypes.class).get(j).setColumnDouble(23551.222 + i);
                         realm1.allObjects(AllTypes.class).get(j).setColumnFloat(10000.256f + i);
-                        realm1.allObjects(AllTypes.class).get(j).setColumnString("new dummy data " + i);
+                        realm1.allObjects(AllTypes.class).get(j).setColumnString("new data " + i);
                         realm1.allObjects(AllTypes.class).get(j).setColumnLong(i + i);
                         realm1.commitTransaction();
                         long stop = System.nanoTime();
@@ -93,7 +92,7 @@ public class MultiRealms extends AndroidTestCase {
             }
         };
 
-        Thread thread2 = new Thread() {
+        final Thread thread2 = new Thread() {
             public void run() {
                 Realm realm2 = Realm.getInstance(getContext(), "default2.realm");
                 addObjectToRealm(50, realm2);
@@ -105,7 +104,7 @@ public class MultiRealms extends AndroidTestCase {
                         realm2.allObjects(AllTypes.class).get(j).setColumnBoolean(true);
                         realm2.allObjects(AllTypes.class).get(j).setColumnDouble(1.222 + i + j);
                         realm2.allObjects(AllTypes.class).get(j).setColumnFloat(1.256f + i + j);
-                        realm2.allObjects(AllTypes.class).get(j).setColumnString("new dummy data " + i + 10000);
+                        realm2.allObjects(AllTypes.class).get(j).setColumnString("new data " + i + 10000);
                         realm2.allObjects(AllTypes.class).get(j).setColumnLong(j + i);
                         realm2.commitTransaction();
                         long stop = System.nanoTime();
@@ -117,16 +116,15 @@ public class MultiRealms extends AndroidTestCase {
             }
         };
 
-        Thread thread3 = new Thread() {
+        final Thread thread3 = new Thread() {
             public void run() {
                 Realm realm3 = Realm.getInstance(getContext(), "default3.realm");
-                addObjectToRealm(50, realm3);
-                File file = createFile("realm3", isInternal);
+                addObjectToRealm(12500, realm3);
+                File file = createFile("realm_update", isInternal);
                 for (int i = 0; i < 12500; i++) {
-
                     long start = System.nanoTime();
                     realm3.beginTransaction();
-                    realm3.allObjects(AllTypes.class).get(1).setColumnString("new dummy data " + i);
+                    realm3.allObjects(AllTypes.class).get(i).setColumnString("new data " + i);
                     realm3.commitTransaction();
                     long stop = System.nanoTime();
                     double ms = ((double) (stop - start) / 1000000.0);
@@ -137,11 +135,11 @@ public class MultiRealms extends AndroidTestCase {
         };
 
 
-        Thread thread4 = new Thread() {
+        final Thread thread4 = new Thread() {
             public void run() {
                 ArrayList<Double> times = new ArrayList<Double>();
                 File dummy_file = createFile("dummy", true);
-                File file = createFile("normal_write", isInternal);
+                File file = createFile("normal_write_no_close", isInternal);
                 for (int i = 0; i < 12500; i++) {
                     long start = System.nanoTime();
                     writeNoClose(dummy_file, String.valueOf(i));
@@ -155,32 +153,18 @@ public class MultiRealms extends AndroidTestCase {
             }
         };
 
-        Thread thread5 = new Thread() {
-            public void run() {
-                File dummy_file = createFile("dummy2", true);
-                File file = createFile("normal_write_close", isInternal);
-                for (int i = 0; i < 12500; i++) {
-                    long start = System.nanoTime();
-                    write(dummy_file, String.valueOf(i));
-                    long stop = System.nanoTime();
-                    double ms = ((double) (stop - start) / 1000000.0);
-                    write(file, decimalFormat.format(ms));
-                }
-            }
-        };
-
-        Thread thread6 = new Thread() {
+        final Thread thread5 = new Thread() {
             public void run() {
                 MySQLiteHelper mySQLiteHelper;
                 mySQLiteHelper = new MySQLiteHelper(getContext());
                 SQLiteDatabase db = mySQLiteHelper.getWritableDatabase();
                 mySQLiteHelper.dropTable(db);
                 mySQLiteHelper.onCreate(db);
-                insertSQLite(50, db);
+                insertSQLite(12500, db);
                 File file = createFile("SQLite", isInternal);
                 for (int i = 0; i < 12500; i++) {
                     long start = System.nanoTime();
-                    db.execSQL("UPDATE test SET string = '" + i + "' WHERE string = '1';");
+                    db.execSQL("UPDATE test SET string = 'new data " + i + "' WHERE string = '" + i + "';");
                     long stop = System.nanoTime();
                     double ms = ((double) (stop - start) / 1000000.0);
                     write(file, decimalFormat.format(ms));
@@ -189,17 +173,35 @@ public class MultiRealms extends AndroidTestCase {
             }
         };
 
+
+        Thread thread6 = new Thread() {
+            public void run() {
+                File dummy_file = createFile("dummy2", true);
+                File file = createFile("normal_write", isInternal);
+                //used for testing this alone
+                //for (int i = 0; i < 12500; i++) {
+                int i = 0;
+                //running while another thread is running
+                while (thread3.isAlive() || thread5.isAlive()) {
+                    long start = System.nanoTime();
+                    write(dummy_file, String.valueOf(i));
+                    long stop = System.nanoTime();
+                    double ms = ((double) (stop - start) / 1000000.0);
+                    write(file, decimalFormat.format(ms));
+                    i++;
+                }
+            }
+        };
+
         Thread thread7 = new Thread() {
             public void run() {
                 Realm realm4 = Realm.getInstance(getContext(), "default4.realm");
                 File file = createFile("realm_insert", isInternal);
-                for (int i = 0; i < 1000; i++) {
+                for (int i = 0; i < 12500; i++) {
                     long start = System.nanoTime();
                     realm4.beginTransaction();
-                    for (int j = 0; j < 50; j++) {
-                        AllTypes allTypes = realm4.createObject(AllTypes.class);
-                        allTypes.setColumnString(String.valueOf(i));
-                    }
+                    AllTypes allTypes = realm4.createObject(AllTypes.class);
+                    allTypes.setColumnString(String.valueOf(i));
                     realm4.commitTransaction();
                     long stop = System.nanoTime();
                     double ms = ((double) (stop - start) / 1000000.0);
@@ -217,14 +219,13 @@ public class MultiRealms extends AndroidTestCase {
                 SQLiteDatabase db = mySQLiteHelper.getWritableDatabase();
                 mySQLiteHelper.dropTable(db);
                 mySQLiteHelper.onCreate(db);
-                for (int i = 0; i < 1000; i++) {
+                for (int i = 0; i < 12500; i++) {
                     long start = System.nanoTime();
-                    for (int j = 0; j < 50; j++) {
-                        db.execSQL("INSERT INTO "
-                                + "test"
-                                + " (string)"
-                                + " VALUES ('" + j + "')");
-                    }
+                    db.execSQL("INSERT INTO "
+                            + "test"
+                            + " (string)"
+                            + " VALUES ('" + i + "')");
+
                     long stop = System.nanoTime();
                     double ms = ((double) (stop - start) / 1000000.0);
                     write(file, decimalFormat.format(ms));
@@ -236,10 +237,10 @@ public class MultiRealms extends AndroidTestCase {
 
         //thread1.start();
         //thread2.start();
-        //thread3.start();
+        thread3.start();
         //thread4.start();
         //thread5.start();
-        //thread6.start();
+        thread6.start();
         //thread7.start();
         //thread8.start();
 
@@ -326,7 +327,7 @@ public class MultiRealms extends AndroidTestCase {
     public void writeNoClose(File file, String content) {
         try {
             FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-            BufferedWriter bw = new BufferedWriter(fw, 1024 * 1024);
+            BufferedWriter bw = new BufferedWriter(fw, 256);
             bw.write(content);
             bw.newLine();
         } catch (IOException e) {
