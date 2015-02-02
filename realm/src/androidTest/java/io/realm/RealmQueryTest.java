@@ -291,10 +291,10 @@ public class RealmQueryTest extends AndroidTestCase{
         Owner owner = testRealm.createObject(Owner.class);
         Dog dog1 = testRealm.createObject(Dog.class);
         dog1.setName("Dog 1");
-        dog1.setWeight(1);
+        /*dog1.setWeight(1);*/
         Dog dog2 = testRealm.createObject(Dog.class);
         dog2.setName("Dog 2");
-        dog2.setWeight(2);
+        /*dog2.setWeight(2);*/
         owner.getDogs().add(dog1);
         owner.getDogs().add(dog2);
         testRealm.commitTransaction();

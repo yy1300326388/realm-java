@@ -17,6 +17,7 @@
 package io.realm;
 
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -167,6 +168,7 @@ public class RealmObjectTest extends AndroidTestCase {
         for (int i = 0; i < TEST_SIZE; i++) {
             Dog dog = testRealm.createObject(Dog.class);
             dog.setAge(i);
+            //dog.setName("Dog "+i);
             ages.add((long) i);
         }
         testRealm.commitTransaction();
@@ -182,8 +184,11 @@ public class RealmObjectTest extends AndroidTestCase {
             } else {
                 dogToRemove = dogs.last();
             }
+            Log.d("HEST", "to remove " + dogToRemove.getAge());
             ages.remove(Long.valueOf(dogToRemove.getAge()));
+            RealmResults<Dog> beforeDogs = testRealm.allObjects(Dog.class);
             dogToRemove.removeFromRealm();
+            RealmResults<Dog> afterDogs = testRealm.allObjects(Dog.class);
 
             // object is no longer valid
             try {
@@ -198,6 +203,7 @@ public class RealmObjectTest extends AndroidTestCase {
             RealmResults<Dog> remainingDogs = testRealm.allObjects(Dog.class);
             assertEquals(TEST_SIZE - i - 1, remainingDogs.size());
             for (Dog dog : remainingDogs) {
+                Log.d("HEST", "Age: " + dog.getAge());
                 assertTrue(ages.contains(Long.valueOf(dog.getAge())));
             }
         }

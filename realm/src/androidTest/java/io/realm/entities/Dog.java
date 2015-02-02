@@ -17,8 +17,6 @@
 
 package io.realm.entities;
 
-import java.util.Date;
-
 import io.realm.RealmObject;
 import io.realm.annotations.Index;
 
@@ -27,19 +25,18 @@ public class Dog extends RealmObject {
     private String name;
     @Index
     private long age;
-    private float height;
+/*    private float height;
     private double weight;
     private boolean hasTail;
     private Date birthday;
     private Owner owner;
-
-    public Dog() {
-    }
+*/
+    public Dog() {}
 
     public Dog(String name) {
         this.name = name;
     }
-
+/*
     public Owner getOwner() {
         return owner;
     }
@@ -79,7 +76,7 @@ public class Dog extends RealmObject {
     public void setHeight(float height) {
         this.height = height;
     }
-
+*/
     public long getAge() {
         return age;
     }
