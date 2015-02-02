@@ -1090,4 +1090,27 @@ public class RealmTest extends AndroidTestCase {
         } catch (UnsupportedOperationException ignore) {
         }
     }
+
+    public void testWrongKeyShouldThrow() {
+        final String WRONG_KEY_REALM = "wrong-key-realm.realm";
+
+        // Wrong key size
+        try {
+            Realm.getInstance(getContext(), WRONG_KEY_REALM, new byte[63]);
+            fail();
+        } catch (IllegalArgumentException ignored) {
+        } catch (Exception ignored) {
+            fail();
+        }
+
+        Realm.getInstance(getContext(), WRONG_KEY_REALM);
+
+        try {
+            Realm.getInstance(getContext(), WRONG_KEY_REALM, new byte[64]);
+            fail();
+        } catch (IllegalStateException ignored) {
+        } catch (Exception ignored) {
+            fail();
+        }
+    }
 }
