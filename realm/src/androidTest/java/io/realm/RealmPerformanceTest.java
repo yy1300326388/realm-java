@@ -169,6 +169,17 @@ public class RealmPerformanceTest extends AndroidTestCase {
         });
     }
 
+    //Test for size timing.
+    public void testCount() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                long count = testRealm.where(Performance.class).count();
+            }
+        });
+    }
+
     //Test for sorting timing.
     public void testSort() {
         String name = getName();
@@ -177,6 +188,18 @@ public class RealmPerformanceTest extends AndroidTestCase {
             public void execute() {
                 realmResults = testRealm.where(Performance.class).contains("string", "test").findAll();
                 realmResults.sort("string");
+            }
+        });
+    }
+
+    //Test for sorting timing.
+    public void testMultiSort() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                realmResults = testRealm.where(Performance.class).lessThanOrEqualTo("integer", 100).findAll();
+                realmResults.sort("string", true, "integer", false, "string_index", true);
             }
         });
     }
@@ -408,7 +431,18 @@ public class RealmPerformanceTest extends AndroidTestCase {
         timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
             @Override
             public void execute() {
-                testRealm.allObjects(Performance.class);
+                realmResults = testRealm.allObjects(Performance.class);
+            }
+        });
+    }
+
+    //Test for allObjectsSorted timing.
+    public void testAllObjectsSort() {
+        String name = getName();
+        timeMeasurement.timer(name, testRealm, warm_up_times, execute_times, timeUnit, new ExecutePerformance() {
+            @Override
+            public void execute() {
+                realmResults = testRealm.allObjectsSorted(Performance.class, "integer", false);
             }
         });
     }
