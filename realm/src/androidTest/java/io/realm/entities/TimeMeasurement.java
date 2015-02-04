@@ -34,6 +34,9 @@ public class TimeMeasurement {
     //Size of data for testing.
     public static final int DATA_SIZE = 10000;
 
+    //sets file type
+    private String file_type = "dat";
+
     private DecimalFormat decimalFormat = new DecimalFormat("##.###");
 
     //Clears data from realm.
@@ -59,12 +62,12 @@ public class TimeMeasurement {
     public void addAllTypesObjects(int objects, Realm testRealm) {
         testRealm.beginTransaction();
         for (int i = 0; i < objects; i++) {
-                AllTypes allTypes = testRealm.createObject(AllTypes.class);
-                allTypes.setColumnBoolean((i % 2) == 0);
-                allTypes.setColumnDouble(3.1415 + i);
-                allTypes.setColumnFloat(1.234567f + i);
-                allTypes.setColumnString("test data " + i);
-                allTypes.setColumnLong(i);
+            AllTypes allTypes = testRealm.createObject(AllTypes.class);
+            allTypes.setColumnBoolean((i % 2) == 0);
+            allTypes.setColumnDouble(3.1415 + i);
+            allTypes.setColumnFloat(1.234567f + i);
+            allTypes.setColumnString("test data " + i);
+            allTypes.setColumnLong(i);
         }
         testRealm.commitTransaction();
     }
@@ -73,12 +76,14 @@ public class TimeMeasurement {
     public void timer(String name, Realm testRealm, int times_to_warm_up, int times_to_execute,
                       TimeUnit timeUnit, ExecutePerformance executePerformance) {
         setTimeUnit(timeUnit);
+        long old_stop = 0;
+        long frozen = 0;
         String fileName_test = name + "_in_" + time_Unit;
         String fileName_warm_up = "warm_up_" + name + "_in_" + time_Unit;
         deleteDir(name);
 
         for (int i = 0; i < times_to_execute + times_to_warm_up; i++) {
-            if(!name.equals("testQueryConstruction")) {
+            if (!name.equals("testQueryConstruction")) {
                 addPerformanceObjects(DATA_SIZE, testRealm);
             } else {
                 addAllTypesObjects(DATA_SIZE, testRealm);
@@ -86,17 +91,21 @@ public class TimeMeasurement {
             long start = System.nanoTime();
             executePerformance.execute();
             long stop = System.nanoTime();
-            double time = ((double) (stop - start) / 1.0);
-            if (time != 0) {
+
+            if (old_stop != start && stop != start && frozen != start) {
+                double time = ((double) (stop - start) / 1.0);
                 if (timeUnit != TimeUnit.NANOSECONDS) {
                     time = timeConverting(stop, start, timeUnit);
                 }
-
                 if (i < times_to_warm_up) {
                     write(name, fileName_warm_up, decimalFormat.format(time));
                 } else {
                     write(name, fileName_test, decimalFormat.format(time));
                 }
+                old_stop = stop;
+            } else {
+                frozen = stop;
+                i--;
             }
             clearRealm(testRealm);
         }
@@ -107,7 +116,7 @@ public class TimeMeasurement {
     public void write(String dirName, String fileName, String content) {
         try {
             String dir_path = "/data/data/io.realm.test/files/" + dirName;
-            String file_path = dir_path + "/" + fileName + ".dat";
+            String file_path = dir_path + "/" + fileName + "." + file_type;
             File dir = new File(dir_path);
             if (!dir.exists()) {
                 dir.mkdir();
@@ -117,13 +126,15 @@ public class TimeMeasurement {
 
             if (!file.exists()) {
                 file.createNewFile();
-                FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
-                BufferedWriter bw = new BufferedWriter(fw);
-                bw.write("##;###\n" +
-                        "@LiveGraph demo file.\n" +
-                        "Time");
-                bw.newLine();
-                bw.close();
+                if (file_type.equals("dat")) {
+                    FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
+                    BufferedWriter bw = new BufferedWriter(fw);
+                    bw.write("##;###\n" +
+                            "@LiveGraph demo file.\n" +
+                            "Time");
+                    bw.newLine();
+                    bw.close();
+                }
             }
             FileWriter fw = new FileWriter(file.getAbsoluteFile(), true);
             BufferedWriter bw = new BufferedWriter(fw);
@@ -149,7 +160,7 @@ public class TimeMeasurement {
 
     //Fetches file.
     public File getFile(String name) {
-        File file = new File("/data/data/io.realm.test/files/" + name + "/" + name + "_in_" + time_Unit + ".dat");
+        File file = new File("/data/data/io.realm.test/files/" + name + "/" + name + "_in_" + time_Unit + "." + file_type);
         return file;
     }
 
@@ -158,15 +169,15 @@ public class TimeMeasurement {
         double time = 0;
         switch (timeUnit) {
             case MICROSECONDS: {
-                time = ((double) stop / 1000.0) - ((double) start/ 1000.0);
+                time = ((double) stop / 1000.0) - ((double) start / 1000.0);
             }
             break;
             case MILLISECONDS: {
-                time = ((double) stop / 1000000.0) - ((double) start/ 1000000.0);
+                time = ((double) stop / 1000000.0) - ((double) start / 1000000.0);
             }
             break;
             case SECONDS: {
-                time = ((double) stop / 1000000000.0) - ((double) start/ 1000000000.0);
+                time = ((double) stop / 1000000000.0) - ((double) start / 1000000000.0);
             }
             break;
 
@@ -203,7 +214,7 @@ public class TimeMeasurement {
         try {
             Scanner scanner = new Scanner(file);
             try {
-                for (int i = 0; i < 3; i ++){
+                for (int i = 0; i < 3; i++) {
                     scanner.nextLine();
                 }
                 min = Double.valueOf(scanner.nextLine());
@@ -228,7 +239,7 @@ public class TimeMeasurement {
         double max = 0;
         try {
             Scanner scanner = new Scanner(file);
-            for (int i = 0; i < 3; i ++){
+            for (int i = 0; i < 3; i++) {
                 scanner.nextLine();
             }
             max = Double.valueOf(scanner.nextLine());
@@ -254,7 +265,7 @@ public class TimeMeasurement {
         int count = 0;
         try {
             Scanner scanner = new Scanner(file);
-            for (int i = 0; i < 3; i ++){
+            for (int i = 0; i < 3; i++) {
                 scanner.nextLine();
             }
             try {
@@ -278,7 +289,7 @@ public class TimeMeasurement {
         int count = 0;
         try {
             Scanner scanner = new Scanner(file);
-            for (int i = 0; i < 3; i ++){
+            for (int i = 0; i < 3; i++) {
                 scanner.nextLine();
             }
             try {
@@ -304,7 +315,7 @@ public class TimeMeasurement {
     public double minMaxPercentDifference(File file) {
         double min = minimum(file);
         double max = maximum(file);
-        double percent = ((max - min) / min) *100.0;
+        double percent = ((max - min) / min) * 100.0;
 
         return percent;
     }
