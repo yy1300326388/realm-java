@@ -295,6 +295,8 @@ JNIEXPORT void JNICALL Java_io_realm_internal_Table_nativeRemoveLast(
 JNIEXPORT void JNICALL Java_io_realm_internal_Table_nativeMoveLastOver
   (JNIEnv *env, jobject, jlong nativeTablePtr, jlong rowIndex)
 {
+    TR_ENTER_PTR(nativeTablePtr)
+    TR("rowIndex = %ld", S(rowIndex))
     if (!TBL_AND_ROW_INDEX_VALID_OFFSET(env, TBL(nativeTablePtr), rowIndex, false))
         return;
     try {
@@ -716,9 +718,12 @@ JNIEXPORT void JNICALL Java_io_realm_internal_Table_nativeClearSubtable(
 JNIEXPORT jlong JNICALL Java_io_realm_internal_Table_nativeGetRowPtr
   (JNIEnv* env, jobject, jlong nativeTablePtr, jlong index)
 {
+    TR_ENTER()
     try {
         Row* row = new Row( (*TBL(nativeTablePtr))[ S(index) ] );
-        return reinterpret_cast<jlong>(row);
+        jlong nativeRowPtr = reinterpret_cast<jlong>(row);
+        TR("nativeRowPtr = %lld", nativeRowPtr);
+        return nativeRowPtr;
     } CATCH_STD()
     return 0;
 }

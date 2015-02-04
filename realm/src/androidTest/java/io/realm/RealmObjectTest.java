@@ -17,7 +17,6 @@
 package io.realm;
 
 import android.test.AndroidTestCase;
-import android.util.Log;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -32,6 +31,7 @@ import java.util.concurrent.Future;
 import io.realm.entities.AllTypes;
 import io.realm.entities.CyclicType;
 import io.realm.entities.Dog;
+import io.realm.entities.MoveCrash;
 import io.realm.entities.Thread;
 import io.realm.internal.Row;
 
@@ -161,6 +161,28 @@ public class RealmObjectTest extends AndroidTestCase {
         realm.close();
     }
 
+    public void testRemoveOne() {
+        io.realm.internal.Util.setDebugLevel(2);
+        testRealm.beginTransaction();
+        testRealm.clear(MoveCrash.class);
+        for (int i = 0; i < TEST_SIZE; i++) {
+            MoveCrash moveCrash = testRealm.createObject(MoveCrash.class);
+            moveCrash.setSecond(i);
+        }
+        testRealm.commitTransaction();
+
+        assertEquals(TEST_SIZE, testRealm.allObjects(MoveCrash.class).size());
+
+        for (int i = 0; i < TEST_SIZE; i++) {
+            testRealm.beginTransaction();
+            MoveCrash moveCrash = testRealm.get(MoveCrash.class, 0);
+            moveCrash.removeFromRealm();
+            testRealm.commitTransaction();
+        }
+
+        assertEquals(0, testRealm.allObjects(MoveCrash.class).size());
+    }
+
     public void removeOneByOne(boolean atFirst) {
         Set<Long> ages = new HashSet<Long>();
         testRealm.beginTransaction();
@@ -184,18 +206,16 @@ public class RealmObjectTest extends AndroidTestCase {
             } else {
                 dogToRemove = dogs.last();
             }
-            Log.d("HEST", "to remove " + dogToRemove.getAge());
             ages.remove(Long.valueOf(dogToRemove.getAge()));
-            RealmResults<Dog> beforeDogs = testRealm.allObjects(Dog.class);
             dogToRemove.removeFromRealm();
-            RealmResults<Dog> afterDogs = testRealm.allObjects(Dog.class);
 
             // object is no longer valid
             try {
                 dogToRemove.getAge();
                 fail();
             }
-            catch (IllegalStateException ignored) {}
+            catch (IllegalStateException ignored) {
+            }
 
             testRealm.commitTransaction();
 
@@ -203,7 +223,6 @@ public class RealmObjectTest extends AndroidTestCase {
             RealmResults<Dog> remainingDogs = testRealm.allObjects(Dog.class);
             assertEquals(TEST_SIZE - i - 1, remainingDogs.size());
             for (Dog dog : remainingDogs) {
-                Log.d("HEST", "Age: " + dog.getAge());
                 assertTrue(ages.contains(Long.valueOf(dog.getAge())));
             }
         }

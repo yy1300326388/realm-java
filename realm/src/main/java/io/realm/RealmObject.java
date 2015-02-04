@@ -22,7 +22,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import io.realm.annotations.RealmClass;
 import io.realm.internal.Row;

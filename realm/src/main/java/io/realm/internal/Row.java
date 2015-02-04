@@ -274,7 +274,13 @@ public class Row {
                 nativePtr = 0; // Set to 0 if finalize is called before close() for some reason
             }
         }
-        nativeClose(nativePtr);
-        nativePtr = 0;
+        //nativeClose(nativePtr);
+        //nativePtr = 0;
+    }
+
+    public void close() {
+        if (nativePtr != 0) {
+            nativeClose(nativePtr);
+        }
     }
 }

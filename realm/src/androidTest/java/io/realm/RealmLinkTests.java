@@ -40,18 +40,18 @@ public class RealmLinkTests extends AndroidTestCase {
         Dog dog1 = testRealm.createObject(Dog.class);
         dog1.setName("Pluto");
         dog1.setAge(5);
-        /*dog1.setHeight(1.2f);
+        dog1.setHeight(1.2f);
         dog1.setWeight(9.9);
         dog1.setHasTail(true);
-        dog1.setBirthday(new Date(2000));*/
+        dog1.setBirthday(new Date(2000));
 
         Dog dog2 = testRealm.createObject(Dog.class);
         dog2.setName("Fido");
         dog2.setAge(10);
-        /*dog2.setHeight(0.7f);
+        dog2.setHeight(0.7f);
         dog2.setWeight(11.3);
         dog2.setHasTail(true);
-        dog2.setBirthday(new Date(4000));*/
+        dog2.setBirthday(new Date(4000));
 
         Cat cat = testRealm.createObject(Cat.class);
         cat.setName("Blackie");
@@ -68,8 +68,8 @@ public class RealmLinkTests extends AndroidTestCase {
         owner.setCat(cat);
 
         cat.setOwner(owner);
-        /*dog1.setOwner(owner);
-        dog2.setOwner(owner);*/
+        dog1.setOwner(owner);
+        dog2.setOwner(owner);
 
         testRealm.commitTransaction();
     }
