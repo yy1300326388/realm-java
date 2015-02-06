@@ -1046,7 +1046,8 @@ public final class Realm implements Closeable {
     }
 
     /**
-     * Get all objects of a specific Class
+     * Get all objects of a specific Class. If no objects exist, the returned RealmResults will not
+     * be null. The RealmResults.size() to check the number of objects instead.
      *
      * @param clazz the Class to get objects of
      * @return A RealmResult list containing the objects
@@ -1058,30 +1059,8 @@ public final class Realm implements Closeable {
     }
 
     /**
-     * Get all objects of a specific Class sorted by a field.
-     *
-     * @param clazz the Class to get objects of.
-     * @param fieldName the field name to sort by.
-     * @param sortAscending sort ascending if SORT_ORDER_ASCENDING, sort descending if SORT_ORDER_DESCENDING.
-     * @return A sorted RealmResults containing the objects.
-     * @throws java.lang.IllegalArgumentException if field name does not exist.
-     */
-    @Deprecated
-    public <E extends RealmObject> RealmResults<E> allObjects(Class<E> clazz, String fieldName, boolean sortAscending) {
-        checkIfValid();
-        Table table = getTable(clazz);
-        TableView.Order order = sortAscending ? TableView.Order.ascending : TableView.Order.descending;
-        Long columnIndex = columnIndices.get(simpleClassNames.get(clazz)).get(fieldName);
-        if (columnIndex == null || columnIndex < 0) {
-            throw new IllegalArgumentException(String.format("Field name '%s' does not exist.", fieldName));
-        }
-
-        TableView tableView = table.getSortedView(columnIndex, order);
-        return new RealmResults<E>(this, tableView, clazz);
-    }
-
-    /**
-     * Get all objects of a specific Class sorted by a field.
+     * Get all objects of a specific Class sorted by a field.  If no objects exist, the returned
+     * RealmResults will not be null. The RealmResults.size() to check the number of objects instead.
      *
      * @param clazz the Class to get objects of.
      * @param fieldName the field name to sort by.
@@ -1103,25 +1082,11 @@ public final class Realm implements Closeable {
         return new RealmResults<E>(this, tableView, clazz);
     }
 
-    /**
-     * Get all objects of a specific class sorted by two field names.
-     *
-     * @param clazz the class ti get objects of.
-     * @param fieldName1 first field name to sort by.
-     * @param sortAscending1 sort order for first field.
-     * @param fieldName2 second field name to sort by.
-     * @param sortAscending2 sort order for second field.
-     * @return A sorted RealmResults containing the objects.
-     * @throws java.lang.IllegalArgumentException if a field name does not exist.
-     */
-    @Deprecated
-    public <E extends RealmObject> RealmResults<E> allObjects(Class<E> clazz, String fieldName1, boolean sortAscending1,
-                                                              String fieldName2, boolean sortAscending2) {
-        return allObjects(clazz, new String[] {fieldName1, fieldName2}, new boolean[] {sortAscending1, sortAscending2});
-    }
 
     /**
-     * Get all objects of a specific class sorted by two field names.
+     * Get all objects of a specific class sorted by two specific field names.  If no objects exist,
+     * the returned RealmResults will not be null. The RealmResults.size() to check the number of
+     * objects instead.
      *
      * @param clazz the class ti get objects of.
      * @param fieldName1 first field name to sort by.
@@ -1134,31 +1099,14 @@ public final class Realm implements Closeable {
     public <E extends RealmObject> RealmResults<E> allObjectsSorted(Class<E> clazz, String fieldName1,
                                                                boolean sortAscending1, String fieldName2,
                                                                boolean sortAscending2) {
-        return allObjects(clazz, new String[] {fieldName1, fieldName2}, new boolean[] {sortAscending1, sortAscending2});
+        return allObjectsSorted(clazz, new String[] {fieldName1, fieldName2}, new boolean[] {sortAscending1,
+                sortAscending2});
     }
 
     /**
-     * Get all objects of a specific class sorted by two specific field names.
-     *
-     * @param clazz the class ti get objects of.
-     * @param fieldName1 first field name to sort by.
-     * @param sortAscending1 sort order for first field.
-     * @param fieldName2 second field name to sort by.
-     * @param sortAscending2 sort order for second field.
-     * @param fieldName3 third field name to sort by.
-     * @param sortAscending3 sort order for third field.
-     * @return A sorted RealmResults containing the objects.
-     * @throws java.lang.IllegalArgumentException if a field name does not exist.
-     */
-    @Deprecated
-    public <E extends RealmObject> RealmResults<E> allObjects(Class<E> clazz, String fieldName1, boolean sortAscending1,
-                                                              String fieldName2, boolean sortAscending2,
-                                                              String fieldName3, boolean sortAscending3) {
-        return allObjects(clazz, new String[] {fieldName1, fieldName2, fieldName3}, new boolean[] {sortAscending1, sortAscending2, sortAscending3});
-    }
-
-    /**
-     * Get all objects of a specific class sorted by two specific field names.
+     * Get all objects of a specific class sorted by two specific field names.  If no objects exist,
+     * the returned RealmResults will not be null. The RealmResults.size() to check the number of
+     * objects instead.
      *
      * @param clazz the class ti get objects of.
      * @param fieldName1 first field name to sort by.
@@ -1174,30 +1122,14 @@ public final class Realm implements Closeable {
                                                                boolean sortAscending1,
                                                               String fieldName2, boolean sortAscending2,
                                                               String fieldName3, boolean sortAscending3) {
-        return allObjects(clazz, new String[] {fieldName1, fieldName2, fieldName3}, new boolean[] {sortAscending1, sortAscending2, sortAscending3});
+        return allObjectsSorted(clazz, new String[] {fieldName1, fieldName2, fieldName3},
+                new boolean[] {sortAscending1, sortAscending2, sortAscending3});
     }
 
     /**
-     * Get all objects of a specific Class sorted by multiple fields.
-     *
-     * @param clazz the Class to get objects of.
-     * @param sortAscending sort ascending if SORT_ORDER_ASCENDING, sort descending if SORT_ORDER_DESCENDING.
-     * @param fieldNames an array of fieldnames to sort objects by.
-     *        The objects are first sorted by fieldNames[0], then by fieldNames[1] and so forth.  
-     * @return A sorted RealmResults containing the objects.
-     * @throws java.lang.IllegalArgumentException if a field name does not exist.
-     */
-    @Deprecated
-    public <E extends RealmObject> RealmResults<E> allObjects(Class<E> clazz, String fieldNames[], boolean sortAscending[]) {
-        // FIXME: This is not an optimal implementation. When core's Table::get_sorted_view() supports
-        // FIXME: multi-column sorting, we can rewrite this method to a far better implementation.
-        RealmResults<E> results = this.allObjects(clazz);
-        results.sort(fieldNames, sortAscending);
-        return results;
-    }
-
-    /**
-     * Get all objects of a specific Class sorted by multiple fields.
+     * Get all objects of a specific Class sorted by multiple fields.  If no objects exist, the
+     * returned RealmResults will not be null. The RealmResults.size() to check the number of
+     * objects instead.
      *
      * @param clazz the Class to get objects of.
      * @param sortAscending sort ascending if SORT_ORDER_ASCENDING, sort descending if SORT_ORDER_DESCENDING.
@@ -1208,11 +1140,27 @@ public final class Realm implements Closeable {
      */
     public <E extends RealmObject> RealmResults<E> allObjectsSorted(Class<E> clazz, String fieldNames[],
                                                                boolean sortAscending[]) {
-        // FIXME: This is not an optimal implementation. When core's Table::get_sorted_view() supports
-        // FIXME: multi-column sorting, we can rewrite this method to a far better implementation.
-        RealmResults<E> results = this.allObjects(clazz);
-        results.sort(fieldNames, sortAscending);
-        return results;
+        if (fieldNames == null) {
+            throw new IllegalArgumentException("fieldNames must be provided.");
+        } else if (sortAscending == null) {
+            throw new IllegalArgumentException("sortAscending must be provided.");
+        }
+
+        // Convert field names to column indices
+        Table table = this.getTable(clazz);
+        long columnIndices[] = new long[fieldNames.length];
+        for (int i = 0; i < fieldNames.length; i++) {
+            String fieldName = fieldNames[i];
+            long columnIndex = table.getColumnIndex(fieldName);
+            if (columnIndex == -1) {
+                throw new IllegalArgumentException(String.format("Field name '%s' does not exist.", fieldName));
+            }
+            columnIndices[i] = columnIndex;
+        }
+        
+        // Perform sort
+        TableView tableView = table.getSortedView(columnIndices, sortAscending);
+        return new RealmResults(this, tableView, clazz);
     }
 
     // Notifications
