@@ -16,6 +16,8 @@
 
 package io.realm.entities;
 
+import android.test.AndroidTestCase;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,7 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.realm.Realm;
 
-public class TimeMeasurement {
+public class TimeMeasurement extends AndroidTestCase {
 
     private String time_Unit = "ns";
 
@@ -37,7 +39,16 @@ public class TimeMeasurement {
     //sets file type
     private String file_type = "dat";
 
+    private String internal_path = "/data/data/io.realm.test/files/";
+    private String external_path = "/storage/emulated/legacy/";
+
     private DecimalFormat decimalFormat = new DecimalFormat("##.###");
+
+    //Decides where to save the file. true if internal, false if external.
+    //To copy the files open the terminal and type adb pull /where/the/directory/is/saved /where/you/want/to/copy/to
+    //For sd card do adb pull /storage/emulated/legacy/the_directory_name where_to_copy/it
+    //For internal memory adb pull /data/data/io.realm.test/files/the_directory_name where_to_copy/it
+    private boolean isInternal = false;
 
     //Clears data from realm.
     public void clearRealm(Realm testRealm) {
@@ -81,7 +92,6 @@ public class TimeMeasurement {
         String fileName_test = name + "_in_" + time_Unit;
         String fileName_warm_up = "warm_up_" + name + "_in_" + time_Unit;
         deleteDir(name);
-
         for (int i = 0; i < times_to_execute + times_to_warm_up; i++) {
             if (!name.equals("testQueryConstruction")) {
                 addPerformanceObjects(DATA_SIZE, testRealm);
@@ -91,7 +101,6 @@ public class TimeMeasurement {
             long start = System.nanoTime();
             executePerformance.execute();
             long stop = System.nanoTime();
-
             if (old_stop != start && stop != start && frozen != start) {
                 double time = ((double) (stop - start) / 1.0);
                 if (timeUnit != TimeUnit.NANOSECONDS) {
@@ -115,13 +124,19 @@ public class TimeMeasurement {
     //Creates and writes to file
     public void write(String dirName, String fileName, String content) {
         try {
-            String dir_path = "/data/data/io.realm.test/files/" + dirName;
-            String file_path = dir_path + "/" + fileName + "." + file_type;
+            String dir_path = "";
+            String file_path = "";
+            if (isInternal == true) {
+                dir_path = internal_path + dirName;
+                file_path = dir_path + "/" + fileName + "." + file_type;
+            } else {
+                dir_path = external_path + dirName;
+                file_path = dir_path + "/" + fileName + "." + file_type;
+            }
             File dir = new File(dir_path);
             if (!dir.exists()) {
                 dir.mkdir();
             }
-
             File file = new File(file_path);
 
             if (!file.exists()) {
@@ -148,19 +163,31 @@ public class TimeMeasurement {
 
     //Deletes file.
     public void deleteDir(String name) {
+        String dir_path = "";
+        if (isInternal == true) {
+            dir_path = internal_path + name;
+            } else {
+            dir_path = external_path + name;
+            }
 
-        File dir = new File("/data/data/io.realm.test/files/" + name);
+        File dir = new File(dir_path);
         if (dir.isDirectory()) {
-            String[] children = dir.list();
-            for (int i = 0; i < children.length; i++) {
-                new File(dir, children[i]).delete();
+            String[] files = dir.list();
+            for (int i = 0; i < files.length; i++) {
+                new File(dir, files[i]).delete();
             }
         }
     }
 
     //Fetches file.
     public File getFile(String name) {
-        File file = new File("/data/data/io.realm.test/files/" + name + "/" + name + "_in_" + time_Unit + "." + file_type);
+        String file_path = "";
+        if (isInternal == true) {
+            file_path = internal_path + name + "/" + name + "_in_" + time_Unit + "." + file_type;
+        } else {
+            file_path = external_path + name + "/" + name + "_in_" + time_Unit + "." + file_type;
+        }
+        File file = new File(file_path);
         return file;
     }
 
@@ -323,11 +350,11 @@ public class TimeMeasurement {
     //Write Statistics to file.
     public void setStatistics(File file, String name) {
         String fileName = "Statistics_for_" + name + "_in_" + time_Unit;
-        write(name, fileName, String.valueOf(decimalFormat.format(minimum(file))));
-        write(name, fileName, String.valueOf(decimalFormat.format(maximum(file))));
-        write(name, fileName, String.valueOf(decimalFormat.format(average(file))));
-        write(name, fileName, String.valueOf(decimalFormat.format(variance(file))));
-        write(name, fileName, String.valueOf(decimalFormat.format(stdDev(file))));
-        write(name, fileName, String.valueOf(decimalFormat.format(minMaxPercentDifference(file))) + "%");
+        write(name, fileName, "Minimum : " + decimalFormat.format(minimum(file)));
+        write(name, fileName, "Maximum : " + decimalFormat.format(maximum(file)));
+        write(name, fileName, "Average : " + decimalFormat.format(average(file)));
+        write(name, fileName, "Variance : " + decimalFormat.format(variance(file)));
+        write(name, fileName, "stdDev : " + decimalFormat.format(stdDev(file)));
+        write(name, fileName, "MinMax difference : " + decimalFormat.format(minMaxPercentDifference(file)) + "%");
     }
 }
