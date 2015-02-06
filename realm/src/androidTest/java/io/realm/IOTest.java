@@ -70,6 +70,7 @@ public class IOTest extends AndroidTestCase {
         }
     }
 
+    //Tests that the timer works.
     public void testSystem_ns() {
         long old_stop = 0;
         long frozen = 0;
@@ -90,6 +91,7 @@ public class IOTest extends AndroidTestCase {
 
     public void testIO() {
 
+        //Test IO timing with multiple fields.
         final Thread thread = new Thread() {
             public void run() {
                 long old_stop = 0;
@@ -120,6 +122,7 @@ public class IOTest extends AndroidTestCase {
             }
         };
 
+        //Tests IO timing with single field
         final Thread thread1 = new Thread() {
             public void run() {
                 long old_stop = 0;
@@ -146,6 +149,7 @@ public class IOTest extends AndroidTestCase {
             }
         };
 
+        //Tests IO timing for SQLite update
         Thread thread2 = new Thread() {
             public void run() {
                 long old_stop = 0;
@@ -174,6 +178,7 @@ public class IOTest extends AndroidTestCase {
             }
         };
 
+        //Tests timing for writing to a normal file not closing
         Thread thread3 = new Thread() {
             public void run() {
                 long old_stop = 0;
@@ -200,6 +205,7 @@ public class IOTest extends AndroidTestCase {
             }
         };
 
+        //Tests timing for writing to a file.
         Thread thread4 = new Thread() {
             public void run() {
                 long old_stop = 0;
@@ -227,6 +233,7 @@ public class IOTest extends AndroidTestCase {
             }
         };
 
+        //Test timing for Realm inserting.
         Thread thread5 = new Thread() {
             public void run() {
                 long old_stop = 0;
@@ -253,6 +260,7 @@ public class IOTest extends AndroidTestCase {
             }
         };
 
+        //Test timing for SQLite inserting.
         Thread thread6 = new Thread() {
             public void run() {
                 long old_stop = 0;
