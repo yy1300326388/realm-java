@@ -272,7 +272,8 @@ public class RealmProcessor extends AbstractProcessor {
                         note(String.format("Setter %s is not associated to any field", methodName));
                     }
                 } else {
-                    error("Only getters and setters should be defined in model classes", executableElement);
+                    // Allow RxJava observable() method
+//                    error("Only getters and setters should be defined in model classes", executableElement);
                 }
             }
 

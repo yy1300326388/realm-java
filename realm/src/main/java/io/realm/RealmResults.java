@@ -29,6 +29,9 @@ import io.realm.exceptions.RealmException;
 import io.realm.internal.ColumnType;
 import io.realm.internal.TableOrView;
 import io.realm.internal.TableView;
+import io.realm.rxjava.RealmObservable;
+import rx.Observable;
+import rx.Subscriber;
 
 /**
  * This class holds all the matches of a {@link io.realm.RealmQuery} for a given Realm. The objects
@@ -52,7 +55,7 @@ import io.realm.internal.TableView;
  * @see Realm#allObjects(Class)
  * @see io.realm.Realm#beginTransaction()
  */
-public class RealmResults<E extends RealmObject> extends AbstractList<E> {
+public class RealmResults<E extends RealmObject> extends AbstractList<E> implements RealmObservable<E> {
 
     private Class<E> classSpec;
     private Realm realm;
@@ -508,6 +511,11 @@ public class RealmResults<E extends RealmObject> extends AbstractList<E> {
         }
 
         currentTableViewVersion = version;
+    }
+
+    @Override
+    public Observable<E> observable() {
+        return Observable.from(this);
     }
 
     // Custom RealmResults iterator. It ensures that we only iterate on a Realm that hasn't changed.
