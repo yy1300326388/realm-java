@@ -28,6 +28,8 @@ import io.realm.internal.LinkView;
 import io.realm.internal.Table;
 import io.realm.internal.TableQuery;
 import io.realm.internal.TableView;
+import io.realm.rxjava.RealmObservable;
+import rx.Observable;
 
 /**
  * A RealmQuery encapsulates a query on a {@link io.realm.Realm} or a {@link io.realm.RealmResults}
@@ -48,7 +50,7 @@ import io.realm.internal.TableView;
  * @see Realm#where(Class)
  * @see RealmResults#where()
  */
-public class RealmQuery<E extends RealmObject> {
+public class RealmQuery<E extends RealmObject> implements RealmObservable<RealmList<E>> {
 
     private Realm realm;
     private Table table;
@@ -1252,5 +1254,12 @@ public class RealmQuery<E extends RealmObject> {
         } else {
             return null;
         }
+    }
+
+    @Override
+    public Observable<RealmList<E>> observable() {
+        // Being able to know when query observers has to be updated, require finegrained notifications,
+        // At least on the Table level
+        return null;
     }
 }
