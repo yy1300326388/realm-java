@@ -1484,3 +1484,8 @@ JNIEXPORT jlong JNICALL Java_io_realm_internal_Table_nativeSetPrimaryKey(
     } CATCH_STD()
     return 0;
 }
+
+JNIEXPORT jint JNICALL Java_io_realm_internal_Table_getIndexInGroup(JNIEnv*, jobject, jlong nativeTablePtr)
+{
+    return TBL(nativeTablePtr)->get_index_in_group();
+}

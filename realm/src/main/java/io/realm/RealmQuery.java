@@ -20,8 +20,10 @@ package io.realm;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.realm.internal.ColumnType;
 import io.realm.internal.LinkView;
@@ -58,6 +60,7 @@ public class RealmQuery<E extends RealmObject> implements RealmObservable<RealmL
     private TableQuery query;
     private Map<String, Long> columns = new HashMap<String, Long>();
     private Class<E> clazz;
+    private Set<Table> tables = new HashSet<>();
 
     private static final String LINK_NOT_SUPPORTED_METHOD = "'%s' is not supported for link queries";
 
@@ -135,6 +138,7 @@ public class RealmQuery<E extends RealmObject> implements RealmObservable<RealmL
     // TODO: consider another caching strategy so linked classes are included in the cache.
     private long[] getColumnIndices(String fieldName, ColumnType fieldType) {
         Table table = this.table;
+        tables.add(table);
         if (containsDot(fieldName)) {
             String[] names = splitString(fieldName); //fieldName.split("\\.");
             long[] columnIndices = new long[names.length];
@@ -147,6 +151,7 @@ public class RealmQuery<E extends RealmObject> implements RealmObservable<RealmL
                 if (type == ColumnType.LINK || type == ColumnType.LINK_LIST) {
                     table = table.getLinkTarget(index);
                     columnIndices[i] = index;
+                    tables.add(table);
                 } else {
                     throw new IllegalArgumentException("Invalid query: " + names[i] + " does not refer to a class.");
                 }
@@ -169,6 +174,10 @@ public class RealmQuery<E extends RealmObject> implements RealmObservable<RealmL
             }
             return new long[] {columns.get(fieldName)};
         }
+    }
+
+    public Set<Table> getTables() {
+        return tables;
     }
 
     // Equal

@@ -28,6 +28,197 @@
 using namespace std;
 using namespace realm;
 
+namespace {
+template<typename T>
+class PrimitiveArray {
+public:
+    PrimitiveArray(JNIEnv* env, jarray array, jsize size)
+    : m_env(env)
+    , m_array(array)
+    , m_size(size)
+    , m_ptr(reinterpret_cast<T*>(env->GetPrimitiveArrayCritical(array, nullptr)))
+    {
+    }
+
+    ~PrimitiveArray()
+    {
+        if (m_ptr)
+            m_env->ReleasePrimitiveArrayCritical(m_array, m_ptr, 0);
+    }
+
+    T* begin()
+    {
+        return m_ptr;
+    }
+
+    T* end()
+    {
+        return m_ptr + m_size;
+    }
+
+private:
+    JNIEnv* m_env;
+    jarray m_array;
+    jsize m_size;
+    T* m_ptr;
+};
+
+class ModifiedRowParser {
+    size_t current_table = 0;
+
+public:
+    std::vector<std::vector<size_t>> modified;
+
+    bool insert_group_level_table(size_t table_ndx, size_t num_tables, StringData) noexcept
+    {
+        if (table_ndx < modified.size()) {
+            size_t count = modified.size() - table_ndx;
+            modified.resize(modified.size() + num_tables);
+            std::move(modified.begin() + table_ndx,
+                      modified.begin() + table_ndx + count,
+                      modified.begin() + table_ndx + num_tables);
+            for (size_t i = table_ndx; i < table_ndx + num_tables; ++i)
+                modified[i].clear();
+        }
+        return true;
+    }
+
+    bool erase_group_level_table(size_t table_ndx, size_t num_tables) noexcept
+    {
+        if (table_ndx < modified.size()) {
+            std::move(modified.begin() + table_ndx + num_tables,
+                      modified.end(),
+                      modified.begin() + table_ndx);
+            modified.resize(modified.size() - std::min(modified.size() - table_ndx, num_tables));
+        }
+        return true;
+    }
+
+    bool rename_group_level_table(size_t, StringData) noexcept { return true; }
+
+    bool select_table(size_t group_level_ndx, int, const size_t*) noexcept
+    {
+        current_table = group_level_ndx;
+        if (current_table >= modified.size())
+            modified.resize(current_table + 1);
+        return true;
+    }
+
+    bool insert_empty_rows(size_t row_ndx, size_t num_rows, size_t last_row_ndx, bool unordered)
+    {
+        if (unordered) {
+            for (size_t i = 0; i < num_rows; ++i) {
+                mark_dirty(row_ndx + i);
+                mark_dirty(last_row_ndx - i - 1);
+            }
+        }
+        else {
+            auto& rows = modified[current_table];
+            for (auto& row : rows) {
+                if (row >= row_ndx)
+                    row += num_rows;
+            }
+            rows.reserve(rows.size() + num_rows);
+            for (size_t i = 0; i < num_rows; ++i)
+                rows.push_back(i + row_ndx);
+        }
+        return true;
+    }
+
+    bool erase_rows(size_t row_ndx, size_t num_rows, size_t last_row_ndx, bool unordered) noexcept
+    {
+        auto& rows = modified[current_table];
+        if (unordered) {
+            size_t out = 0;
+            for (auto row : rows) {
+                if (row > last_row_ndx - num_rows)
+                    ++out;
+                else
+                    rows[out++] = row;
+            }
+            for (size_t i = 0; i < num_rows; ++i)
+                mark_dirty(row_ndx + i);
+        }
+        else {
+            size_t out = 0;
+            for (auto row : rows) {
+                if (row >= row_ndx && row < row_ndx - num_rows)
+                    ;
+                else if (row >= row_ndx)
+                    rows[out++] = row - num_rows;
+                else
+                    rows[out++] = row;
+            }
+            rows.erase(rows.begin() + out, rows.end());
+        }
+        return true;
+    }
+
+    bool clear_table() noexcept
+    {
+        modified[current_table].clear();
+        return true;
+    }
+
+    bool add_int_to_column(size_t, int_fast64_t) { return false; }
+
+    // Things that just mark the row as modified
+    bool insert_int(size_t, size_t row_ndx, size_t, int_fast64_t) { return mark_dirty(row_ndx); }
+    bool insert_bool(size_t, size_t row_ndx, size_t, bool) { return mark_dirty(row_ndx); }
+    bool insert_float(size_t, size_t row_ndx, size_t, float) { return mark_dirty(row_ndx); }
+    bool insert_double(size_t, size_t row_ndx, size_t, double) { return mark_dirty(row_ndx); }
+    bool insert_string(size_t, size_t row_ndx, size_t, StringData) { return mark_dirty(row_ndx); }
+    bool insert_binary(size_t, size_t row_ndx, size_t, BinaryData) { return mark_dirty(row_ndx); }
+    bool insert_date_time(size_t, size_t row_ndx, size_t, DateTime) { return mark_dirty(row_ndx); }
+    bool insert_table(size_t, size_t row_ndx, size_t) { return mark_dirty(row_ndx); }
+    bool insert_mixed(size_t, size_t row_ndx, size_t, const Mixed&) { return mark_dirty(row_ndx); }
+    bool insert_link(size_t, size_t row_ndx, size_t, size_t) { return mark_dirty(row_ndx); }
+    bool insert_link_list(size_t, size_t row_ndx, size_t) { return mark_dirty(row_ndx); }
+
+    bool set_int(size_t, size_t row_ndx, int_fast64_t) { return mark_dirty(row_ndx); }
+    bool set_bool(size_t, size_t row_ndx, bool) { return mark_dirty(row_ndx); }
+    bool set_float(size_t, size_t row_ndx, float) { return mark_dirty(row_ndx); }
+    bool set_double(size_t, size_t row_ndx, double) { return mark_dirty(row_ndx); }
+    bool set_string(size_t, size_t row_ndx, StringData) { return mark_dirty(row_ndx); }
+    bool set_binary(size_t, size_t row_ndx, BinaryData) { return mark_dirty(row_ndx); }
+    bool set_date_time(size_t, size_t row_ndx, DateTime) { return mark_dirty(row_ndx); }
+    bool select_link_list(size_t, size_t row_ndx) { return mark_dirty(row_ndx); }
+    bool set_table(size_t, size_t row_ndx) { return mark_dirty(row_ndx); }
+    bool set_mixed(size_t, size_t row_ndx, const Mixed&) { return mark_dirty(row_ndx); }
+    bool set_link(size_t, size_t row_ndx, size_t) { return mark_dirty(row_ndx); }
+
+    // Things we don't need to do anything for
+    bool row_insert_complete() { return true; }
+    bool optimize_table() { return true; }
+    bool select_descriptor(int, const size_t*) { return true; }
+    bool insert_column(size_t, DataType, StringData) { return true; }
+    bool insert_link_column(size_t, DataType, StringData, size_t, size_t) { return true; }
+    bool erase_column(size_t) { return true; }
+    bool erase_link_column(size_t, size_t, size_t) { return true; }
+    bool rename_column(size_t, StringData) { return true; }
+    bool add_search_index(size_t) { return true; }
+    bool remove_search_index(size_t) { return true; }
+    bool add_primary_key(size_t) { return true; }
+    bool remove_primary_key() { return true; }
+    bool set_link_type(size_t, LinkType) { return true; }
+    bool link_list_set(size_t, size_t) { return true; }
+    bool link_list_insert(size_t, size_t) { return true; }
+    bool link_list_move(size_t, size_t) { return true; }
+    bool link_list_erase(size_t) { return true; }
+    bool link_list_clear() { return true; }
+
+private:
+    bool mark_dirty(size_t row_ndx) {
+        auto& vec = modified[row_ndx];
+        if (find(vec.begin(), vec.end(), row_ndx) == vec.end())
+            vec.push_back(row_ndx);
+        return true;
+    }
+};
+
+} // anonymous namespace
+
+
 #define SG(ptr) reinterpret_cast<SharedGroup*>(ptr)
 
 JNIEXPORT jlong JNICALL Java_io_realm_internal_SharedGroup_nativeCreate(
@@ -134,14 +325,49 @@ JNIEXPORT jlong JNICALL Java_io_realm_internal_SharedGroup_nativeBeginImplicit
     return 0;
 }
 
-JNIEXPORT void JNICALL Java_io_realm_internal_SharedGroup_nativeAdvanceRead
-(JNIEnv *env, jobject, jlong native_ptr)
+JNIEXPORT jlongArray JNICALL Java_io_realm_internal_SharedGroup_nativeAdvanceRead
+(JNIEnv *env, jobject, jlong native_ptr, jlongArray observedRows, jintArray observedTables)
 {
     TR_ENTER_PTR(native_ptr)
     try {
-        LangBindHelper::advance_read( *SG(native_ptr) );
+        jsize rowCount = env->GetArrayLength(observedRows);
+        jsize tableCount = env->GetArrayLength(observedTables);
+        if (rowCount == 0 && tableCount == 0) {
+            LangBindHelper::advance_read(*SG(native_ptr));
+            return nullptr;
+        }
+
+        ModifiedRowParser m;
+        LangBindHelper::advance_read(*SG(native_ptr), m);
+
+        std::vector<jlong> mi;
+        if (rowCount > 0) {
+            PrimitiveArray<Row*> rows(env, observedRows, rowCount);
+            size_t i = 0;
+            for (auto r : rows) {
+                size_t ti = r->get_table()->get_index_in_group();
+                if (ti >= m.modified.size())
+                    continue;
+                if (find(m.modified[ti].begin(), m.modified[ti].end(), r->get_index()) != m.modified[ti].end())
+                    mi.push_back(i);
+                ++i;
+            }
+        }
+
+        if (tableCount > 0) {
+            PrimitiveArray<int> tables(env, observedTables, tableCount);
+            for (auto& t : tables) {
+                if (t > m.modified.size() || m.modified[t].size() == 0)
+                    t = -1;
+            }
+        }
+
+        jlongArray ret = env->NewLongArray(mi.size());
+        env->SetLongArrayRegion(ret, 0, mi.size(), mi.data());
+        return ret;
     }
     CATCH_STD()
+    return 0;
 }
 
 JNIEXPORT void JNICALL Java_io_realm_internal_SharedGroup_nativePromoteToWrite

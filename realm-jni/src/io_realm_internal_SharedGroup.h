@@ -26,10 +26,10 @@ JNIEXPORT jlong JNICALL Java_io_realm_internal_SharedGroup_nativeCreateReplicati
 /*
  * Class:     io_realm_internal_SharedGroup
  * Method:    nativeAdvanceRead
- * Signature: (J)V
+ * Signature: (J[J)[J
  */
-JNIEXPORT void JNICALL Java_io_realm_internal_SharedGroup_nativeAdvanceRead
-  (JNIEnv *, jobject, jlong);
+JNIEXPORT jlongArray JNICALL Java_io_realm_internal_SharedGroup_nativeAdvanceRead
+  (JNIEnv *, jobject, jlong, jlongArray);
 
 /*
  * Class:     io_realm_internal_SharedGroup

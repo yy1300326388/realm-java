@@ -104,4 +104,12 @@ public abstract class RealmObject {
     public boolean isValid() {
         return row != null && row.isAttached();
     }
+
+    public Realm getRealm() {
+        return realm;
+    }
+
+    public Row getRow() {
+        return row;
+    }
 }

@@ -16,11 +16,13 @@
 
 package io.realm.rxjava;
 
+import io.realm.Realm;
 import io.realm.RealmList;
 import io.realm.RealmObject;
 import io.realm.RealmQuery;
 import io.realm.RealmResults;
 import rx.Observable;
+import rx.Subscriber;
 
 /**
  * Factory class for creating observables from Realm types. Most likely from
@@ -54,6 +56,37 @@ public class RxRealm {
         return null;
     }
 
+    static class RxObserverAdaptor<T extends Object> implements Realm.Observer<T> {
+        private final Subscriber<? super T> subscriber;
 
+        public RxObserverAdaptor(final Subscriber<? super T> subscriber) {
+            this.subscriber = subscriber;
+        }
 
+        @Override
+        public void onChange(T newValue) {
+            if (newValue != null)
+                subscriber.onNext(newValue);
+            else
+                subscriber.onCompleted();
+        }
+    }
+
+    public static <E extends RealmObject> Observable<E> observable(final Realm realm, final E object) {
+        return Observable.create(new Observable.OnSubscribe<E>() {
+            @Override
+            public void call(final Subscriber<? super E> observer) {
+                realm.observe(object, new RxObserverAdaptor<>(observer));
+            }
+        });
+    }
+
+    public static <E extends RealmObject> Observable<RealmResults<E>> observe(final Realm realm, final RealmQuery<E> query) {
+        return Observable.create(new Observable.OnSubscribe<RealmResults<E>>() {
+            @Override
+            public void call(Subscriber<? super RealmResults<E>> subscriber) {
+                realm.observe(query, new RxObserverAdaptor<RealmResults<E>>(subscriber));
+            }
+        });
+    }
 }

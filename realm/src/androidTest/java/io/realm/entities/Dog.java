@@ -22,6 +22,7 @@ import java.util.Date;
 import io.realm.RealmObject;
 import io.realm.annotations.Index;
 import io.realm.rxjava.RealmObservable;
+import io.realm.rxjava.RxRealm;
 import rx.Observable;
 
 public class Dog extends RealmObject implements RealmObservable<Dog> {
@@ -100,6 +101,6 @@ public class Dog extends RealmObject implements RealmObservable<Dog> {
 
     @Override
     public Observable<Dog> observable() {
-        return Observable.just(this);
+        return RxRealm.createObservable(this);
     }
 }

@@ -87,11 +87,11 @@ public class SharedGroup implements Closeable {
             checkNativePtr();
         }
     */
-    void advanceRead() {
-        nativeAdvanceRead(nativePtr);
+    long[] advanceRead(long[] rowsToCheck, int[] tables) {
+        return nativeAdvanceRead(nativePtr, rowsToCheck, tables);
     }
 
-    private native void nativeAdvanceRead(long nativePtr);
+    private native long[] nativeAdvanceRead(long nativePtr, long[] rowsPtr, int[] tables);
 
     void promoteToWrite() {
         nativePromoteToWrite(nativePtr);

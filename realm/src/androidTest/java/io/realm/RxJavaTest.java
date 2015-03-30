@@ -16,11 +16,17 @@
 
 package io.realm;
 
+import android.os.AsyncTask;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.test.AndroidTestCase;
 import android.util.Log;
 
+import java.util.concurrent.Callable;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 
 import io.realm.entities.Dog;
@@ -96,6 +102,51 @@ public class RxJavaTest extends AndroidTestCase {
             }
         };
         obj.subscribe(subscriber);
+    }
+
+    public void testRefresh() throws Exception {
+        realm.executeTransaction(new Realm.Transaction() {
+            @Override
+            public void execute(Realm realm) {
+                realm.copyToRealm(new Dog("Foo"));
+            }
+        });
+
+        Observable<Dog> obj = realm.allObjects(Dog.class).first().observable();
+        Subscriber<Dog> subscriber = new Subscriber<Dog>() {
+            @Override
+            public void onCompleted() {
+                Log.i(LOG_TAG, "Done");
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.i(LOG_TAG, "Error");
+            }
+
+            @Override
+            public void onNext(Dog dog) {
+                Log.i(LOG_TAG, "Type:" + dog.getName());
+            }
+        };
+        obj.subscribe(subscriber);
+
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<Boolean> future = executorService.submit(new Callable<Boolean>() {
+            @Override
+            public Boolean call() throws Exception {
+                Looper.prepare();
+                Realm realm = Realm.getInstance(getContext());
+                realm.beginTransaction();
+                realm.allObjects(Dog.class).first().setName("new name");
+                realm.commitTransaction();
+                realm.close();
+                return true;
+            }
+        });
+        future.get();
+
+        realm.refresh();
     }
 
     public void testSingleObjectOnAnotherThread() throws InterruptedException {

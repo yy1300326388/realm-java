@@ -64,7 +64,6 @@ import io.realm.internal.android.DebugAndroidLogger;
 import io.realm.internal.android.ReleaseAndroidLogger;
 import io.realm.internal.log.RealmLog;
 
-
 /**
  * The Realm class is the storage and transactional manager of your object persistent store. It
  * is in charge of creating instances of your RealmObjects. Objects within a Realm can be queried
@@ -181,6 +180,18 @@ public final class Realm implements Closeable {
 
     static {
         RealmLog.add(BuildConfig.DEBUG ? new DebugAndroidLogger() : new ReleaseAndroidLogger());
+    }
+
+    public interface Observer<E> {
+        void onChange(E newValue);
+    }
+
+    public <E extends RealmObject> void observe(E object, Observer<? super E> observer) {
+        transaction.addObserver(object, observer);
+    }
+
+    public <E extends RealmObject> void observe(RealmQuery object, Observer<RealmResults<E>> observer) {
+        transaction.addObserver(object, observer);
     }
 
     protected void checkIfValid() {
