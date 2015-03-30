@@ -135,7 +135,7 @@ public class ClassMetaData {
                     Utils.error(String.format("Setter %s is not associated to any field", methodName), executableElement);
                     return false;
                 }
-            } else {
+            } else if (!methodName.equals("observable")) {
                 Utils.error("Only getters and setters should be defined in model classes", executableElement);
                 return false;
             }
