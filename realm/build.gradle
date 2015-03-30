@@ -30,6 +30,7 @@ dependencies {
     compile files("../realm-annotations/build/libs/realm-annotations-${version}.jar")
     androidTestApt files("../realm-annotations-processor/build/libs/realm-annotations-processor-${version}.jar")
     androidTestApt files("../realm-annotations/build/libs/realm-annotations-${version}.jar")
+    compile 'io.reactivex:rxjava:1.0.8'
 }
 
 android.libraryVariants.all { variant ->
