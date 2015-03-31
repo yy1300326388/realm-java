@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-/*package com.tightdb;
+/*package com.realm;
 
 public class SharedGroupWithReplication extends SharedGroup {
 
