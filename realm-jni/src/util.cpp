@@ -286,7 +286,7 @@ jstring to_jstring(JNIEnv* env, StringData str)
 
     const size_t stack_buf_size = 48;
     jchar stack_buf[stack_buf_size];
-    UniquePtr<jchar[]> dyn_buf;
+    std::unique_ptr<jchar[]> dyn_buf;
 
     const char* in_begin = str.data();
     const char* in_end   = str.data() + str.size();

@@ -17,6 +17,7 @@
 #ifndef REALM_JAVA_UTIL_HPP
 #define REALM_JAVA_UTIL_HPP
 
+#include <memory>
 #include <string>
 #include <sstream>
 
@@ -28,7 +29,6 @@
 
 #include <realm.hpp>
 #include <realm/util/meta.hpp>
-#include <realm/util/unique_ptr.hpp>
 #include <realm/util/safe_int_ops.hpp>
 #include <realm/lang_bind_helper.hpp>
 
@@ -461,7 +461,7 @@ public:
     }
 
 private:
-    realm::util::UniquePtr<char[]> m_data;
+    std::unique_ptr<char[]> m_data;
     std::size_t m_size;
 };
 

@@ -111,9 +111,9 @@ JNIEXPORT jlong JNICALL Java_io_realm_internal_SharedGroup_nativeCreateReplicati
         file_name = StringData(file_name_tmp);
         KeyBuffer key(env, keyArray);
 #ifdef REALM_ENABLE_ENCRYPTION
-        Replication* repl = makeWriteLogCollector(file_name, false, key.data());
+        Replication* repl = makeWriteLogCollector(file_name, false, key.data()).release();
 #else
-        Replication* repl = makeWriteLogCollector(file_name);
+        Replication* repl = makeWriteLogCollector(file_name).release();
 #endif
         return reinterpret_cast<jlong>(repl);
     }
