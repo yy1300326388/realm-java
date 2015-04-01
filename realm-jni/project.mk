@@ -16,7 +16,7 @@ endif
 # FIXME: '-fno-elide-constructors' currently causes TightDB to fail
 #CFLAGS_DEBUG += -fno-elide-constructors
 CFLAGS_PTHREADS += -pthread
-CFLAGS_GENERAL += -Wextra -ansi -pedantic -Wno-long-long
+CFLAGS_GENERAL += -Wextra -pedantic
 
 # Avoid a warning from Clang when linking on OS X. By default,
 # `LDFLAGS_PTHREADS` inherits its value from `CFLAGS_PTHREADS`, so we

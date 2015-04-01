@@ -153,7 +153,7 @@ targets.each { target ->
             'make',
             '-C', "${projectDir}/src",
             "CC_IS=${clang?'clang':'gcc'}",
-            "REALM_CFLAGS=-Wno-variadic-macros -DREALM_HAVE_CONFIG -DPIC -I${projectDir}/../core-${project.coreVersion}/include",
+            "REALM_CFLAGS=-DREALM_HAVE_CONFIG -DPIC -I${projectDir}/../core-${project.coreVersion}/include",
             "CFLAGS_ARCH=${(commonCflags + target.cflags).join(' ')}",
             "BASE_DENOM=${target.name}",
             "REALM_LDFLAGS=-lrealm-android-${target.name} -lstdc++ -lsupc++ -llog -L${projectDir}/../core-${project.coreVersion} -Wl,--gc-sections -flto",
