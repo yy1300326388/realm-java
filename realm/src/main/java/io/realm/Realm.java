@@ -45,8 +45,10 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import io.realm.exceptions.RealmException;
@@ -121,6 +123,10 @@ import io.realm.internal.log.RealmLog;
  * @see <a href="https://github.com/realm/realm-java/tree/master/examples">Examples using Realm</a>
  */
 public final class Realm implements Closeable {
+    static AtomicBoolean firstClose = new AtomicBoolean(true);
+    static AtomicBoolean secondCreate = new AtomicBoolean(false);
+    private static CountDownLatch closeLatch = new CountDownLatch(1);
+
     public static final String DEFAULT_REALM_NAME = "default.realm";
 
     // This single thread executor ensures that only one finalizer thread ever exists
@@ -249,6 +255,14 @@ public final class Realm implements Closeable {
             sharedGroup = null;
             AtomicInteger counter = globalOpenInstanceCounter.get(canonicalPath);
             if (counter.decrementAndGet() == 0) {
+                if (firstClose.get()) {
+                    firstClose.set(false);
+                    try {
+                        closeLatch.await();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
                 globalOpenInstanceCounter.remove(canonicalPath);
             }
         }
@@ -597,6 +611,11 @@ public final class Realm implements Closeable {
 
         // Increment global reference counter
         if (references == 0) {
+            if (secondCreate.get()) {
+                closeLatch.countDown();
+            } else {
+                secondCreate.set(true);
+            }
             AtomicInteger counter = globalOpenInstanceCounter.get(canonicalPath);
             if (counter == null) {
                 globalOpenInstanceCounter.put(canonicalPath, new AtomicInteger(1));

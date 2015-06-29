@@ -93,7 +93,7 @@ public class RealmTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         Realm.deleteRealmFile(getContext());
-        testRealm = Realm.getInstance(getContext());
+        //testRealm = Realm.getInstance(getContext());
     }
 
     @Override
@@ -1750,5 +1750,37 @@ public class RealmTest extends AndroidTestCase {
         // After exception thrown in another thread, nothing should be changed to the realm in this thread.
         testRealm.checkIfValid();
         testRealm.close();
+    }
+
+    public void testCloseNullPointer() throws Throwable {
+        final CountDownLatch latch = new CountDownLatch(1);
+        final Throwable threadAssertionError[] = new Throwable[1];
+        testRealm = Realm.getInstance(getContext());
+
+        final Thread thatThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Realm realm = Realm.getInstance(getContext());
+                    realm.close();
+                } catch (IllegalStateException ignored) {
+                } catch (NullPointerException ne)  {
+                    threadAssertionError[0] = ne;
+                }
+                latch.countDown();
+            }
+        });
+        thatThread.start();
+        testRealm.close();
+
+        // Timeout should never happen
+        latch.await();
+        if (threadAssertionError[0] != null) {
+            throw threadAssertionError[0];
+        }
+        // After exception thrown in another thread, nothing should be changed to the realm in this thread.
+        testRealm.checkIfValid();
+        testRealm.close();
+
     }
 }
