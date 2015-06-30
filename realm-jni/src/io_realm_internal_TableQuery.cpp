@@ -17,6 +17,7 @@
 #include "util.hpp"
 #include "io_realm_internal_TableQuery.h"
 #include "tablequery.hpp"
+#include "util.hpp"
 
 using namespace realm;
 
@@ -220,6 +221,10 @@ JNIEXPORT void JNICALL Java_io_realm_internal_TableQuery_nativeLessEqual__J_3JJ(
 JNIEXPORT void JNICALL Java_io_realm_internal_TableQuery_nativeBetween__J_3JJJ(
     JNIEnv* env, jobject, jlong nativeQueryPtr, jlongArray columnIndexes, jlong value1, jlong value2)
 {
+
+    TR("value1 %" PRId64, static_cast<int64_t>(value1))
+    TR("value2 %" PRId64, static_cast<int64_t>(value2))
+
     GET_ARRAY()
     try {
         if (arr_len == 1) {

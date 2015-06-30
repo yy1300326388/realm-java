@@ -22,7 +22,10 @@ import java.util.Date;
 
 import io.realm.entities.Cat;
 import io.realm.entities.Dog;
+import io.realm.entities.Levels;
 import io.realm.entities.Owner;
+import io.realm.entities.Points;
+import io.realm.entities.Root;
 
 public class RealmLinkTests extends AndroidTestCase {
 
@@ -519,5 +522,70 @@ public class RealmLinkTests extends AndroidTestCase {
             fail();
         } catch (IllegalArgumentException expected) {
         }
+    }
+
+    public void testBetween() {
+        testRealm.beginTransaction();
+
+        Points points1 = testRealm.createObject(Points.class);
+        points1.setX(17000);
+        points1.setY(13000);
+
+        Points points2 = testRealm.createObject(Points.class);
+        points2.setX(19200);
+        points2.setY(19500);
+
+        Points points3 = testRealm.createObject(Points.class);
+        points3.setX(22000);
+        points3.setY(25000);
+
+        Points points4 = testRealm.createObject(Points.class);
+        points4.setX(27000);
+        points4.setY(30000);
+
+        Levels levels1 = testRealm.createObject(Levels.class);
+        levels1.setZoomLevel(15);
+        levels1.getPoints().add(points1);
+
+        Levels levels2 = testRealm.createObject(Levels.class);
+        levels2.setZoomLevel(16);
+        levels2.getPoints().add(points2);
+
+        Levels levels3 = testRealm.createObject(Levels.class);
+        levels3.setZoomLevel(17);
+        levels3.getPoints().add(points3);
+
+        Levels levels4 = testRealm.createObject(Levels.class);
+        levels4.setZoomLevel(18);
+        levels4.getPoints().add(points4);
+
+        Root root = new Root();
+        root.setUuid("1");
+        root.setLevels(new RealmList<Levels>());
+        root.getLevels().add(levels1);
+        root.getLevels().add(levels2);
+        root.getLevels().add(levels3);
+        root.getLevels().add(levels4);
+        testRealm.copyToRealmOrUpdate(root);
+
+        testRealm.commitTransaction();
+
+
+        int MinX = 17435;
+        int MaxX = 18500;
+        int MinY = 14000;
+        int MaxY = 15000;
+        int zoomLevel = 15;
+        RealmResults<Root> results1 = testRealm.where(Root.class).equalTo("levels.zoomLevel", zoomLevel).between("levels.points.X", MinX, MaxX).between("levels.points.Y", MinY, MaxY).findAll();
+        //RealmResults<Levels> results1 = testRealm.where(Levels.class).equalTo("zoomLevel", zoomLevel).between("points.X", MinX, MaxX).between("points.Y", MinY, MaxY).findAll();
+        assertEquals(0, results1.size());
+
+        MinX = 0;
+        MaxX = 1;
+        MinY = 10;
+        MaxY = 20;
+        zoomLevel = 15;
+        RealmResults<Root> results2 = testRealm.where(Root.class).equalTo("levels.zoomLevel", zoomLevel).between("levels.points.X", MinX, MaxX).between("levels.points.Y", MinY, MaxY).findAll();
+        assertEquals(0, results2.size());
     }
 }
