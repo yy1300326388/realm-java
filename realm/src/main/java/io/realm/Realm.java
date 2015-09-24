@@ -57,32 +57,31 @@ import io.realm.internal.Util;
 import io.realm.internal.log.RealmLog;
 
 /**
- * The Realm class is the storage and transactional manager of your object persistent store. It
- * is in charge of creating instances of your RealmObjects. Objects within a Realm can be queried
- * and read at any time. Creating, modifying, and deleting objects must be done while inside a
- * transaction. See {@link #beginTransaction()}
+ * {@link Realm} クラスは永続化されたオブジェクトのためのストレージとトランザクションを管理します。
+ * また、{@link RealmObject}のインスタンス生成も担当しています。Realm内に保存されたオブジェクトは
+ * いつでも検索し読みだすことができます。オブジェクトの作成、変更、削除はトランザクションの中で
+ * 行われる必要があります。詳しくは {@link #beginTransaction()} を参照してください。
  * <p>
- * The transactions ensure that multiple instances (on multiple threads) can access the same
- * objects in a consistent state with full ACID guarantees.
+ * トランザクションは、異なるスレッド上のそれぞれのRealmインスタンスが同じオブジェクトに対して
+ * アクセスする際の完全なACID特性を保証します。
  * <p>
- * It is important to remember to call the {@link #close()} method when done with a Realm
- * instance. Failing to do so can lead to {@link java.lang.OutOfMemoryError} as the native
- * resources cannot be freed.
+ * Realmインスタンスにに対する処理が完了した際は{@link #close()}メソッドを忘れずに呼び出すことは
+ * とても重要です。これを忘れると、{@link OutOfMemoryError}の発生やJNI層のリソースのリークを
+ * 引き起こします。
  * <p>
- * Realm instances cannot be used across different threads. This means that you have to open an
- * instance on each thread you want to use Realm. Realm instances are cached automatically per
- * thread using reference counting, so as long as the reference count doesn't reach zero, calling
- * {@link #getInstance(RealmConfiguration)} will just return the cached Realm and should be
- * considered a lightweight operation.
+ * Realmインスタンスは１つのインスタンスからしか使用することができません。これは、Realmを使用する
+ * スレッドはそれぞれが個別にRealmインスタンスをオープンする必要があることを意味します。
+ * Realmインスタンスは参照カウントを用いてスレッド単位でキャッシュされるため、参照カウントが正数の
+ * 間は{@link #getInstance(RealmConfiguration)}は単にキャッシュされたインスタンスを返す軽量な操作です。
  * <p>
- * For the UI thread this means that opening and closing Realms should occur in either
- * onCreate/onDestroy or onStart/onStop.
+ * このことは、UIスレッドでのRealmのオープン/クローズは{@code onCreate()}/{@code onDestroy()}や
+ * {@code onStart()}/{@code onStop()}で行うことが望ましいことを意味します。
  * <p>
- * Realm instances coordinate their state across threads using the {@link android.os.Handler}
- * mechanism. This also means that Realm instances on threads without a {@link android.os.Looper}
- * cannot receive updates unless {@link #refresh()} is manually called.
+ * Realmインスタンスは{@link Handler}を使ってスレッド間の連係を行います。このことは、{@link Looper}を
+ * 持たないスレッド上でオープンされたRealmインスタンスは、手動で{@link #refresh()}を呼ばないかぎり
+ * 他のスレッドでの更新を受け取ることができないことを意味します。
  * <p>
- * A standard pattern for working with Realm in Android activities can be seen below:
+ * AndroidのアクティビティでのRealmの標準的な使い方は以下の通りです。
  * <p>
  * <pre>
  * public class RealmActivity extends Activity {
@@ -104,9 +103,9 @@ import io.realm.internal.log.RealmLog;
  * }
  * </pre>
  * <p>
- * Realm supports String and byte fields containing up to 16 MB.
+ * Realmは16 MBまでの文字列とバイト配列のフィールドをサポートします。
  * <p>
- * @see <a href="http://en.wikipedia.org/wiki/ACID">ACID</a>
+ * @see <a href="https://ja.wikipedia.org/wiki/ACID_(%E3%82%B3%E3%83%B3%E3%83%94%E3%83%A5%E3%83%BC%E3%82%BF%E7%A7%91%E5%AD%A6)">ACID</a>
  * @see <a href="https://github.com/realm/realm-java/tree/master/examples">Examples using Realm</a>
  */
 public final class Realm extends BaseRealm {
@@ -163,20 +162,21 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Realm static constructor for the default Realm file {@value io.realm.RealmConfiguration#DEFAULT_REALM_NAME}.
-     * This is equivalent to calling {@code Realm.getInstance(new RealmConfiguration(getContext()).build()) }.
+     * デフォルトのRealmファイル{@value io.realm.RealmConfiguration#DEFAULT_REALM_NAME}を対象とする
+     * Realmインスタンスを返すstaticコンストラクタです。
+     * このメソッドは{@code Realm.getInstance(new RealmConfiguration(getContext()).build()) }と
+     * 等価です。
      *
-     * This constructor is only provided for convenience. It is recommended to use
-     * {@link #getInstance(RealmConfiguration)} or {@link #getDefaultInstance()}.
+     * このコンストラクタは簡易利用のために提供されています。
+     * {@link #getInstance(RealmConfiguration)}または{@link #getDefaultInstance()}の利用を推奨します。
      *
-     * @param context a non-null Android {@link android.content.Context}
-     * @return an instance of the Realm class.
-
-     * @throws java.lang.IllegalArgumentException if no {@link Context} is provided.
-     * @throws RealmMigrationNeededException if the model classes no longer match the underlying Realm
-     *                                       and it must be migrated.
-     * @throws RealmIOException              if an error happened when accessing the underlying Realm
-     *                                       file.
+     * @param context Androidの{@link android.content.Context}。{@code null}不可。
+     * @return Realmインスタンスを返します。
+     *
+     * @throws java.lang.IllegalArgumentException {@link Context}が{@code null}の場合にスローされます。
+     * @throws RealmMigrationNeededException モデルクラスが変更されたためマイグレーションが必要な場合に
+     *                                       スローされます。
+     * @throws RealmIOException              ファイルアクセスでエラーがが発生した場合にスローされます。
      */
     public static Realm getInstance(Context context) {
         return Realm.getInstance(new RealmConfiguration.Builder(context)
@@ -185,14 +185,17 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Realm static constructor that returns the Realm instance defined by the {@link io.realm.RealmConfiguration} set
-     * by {@link #setDefaultConfiguration(RealmConfiguration)}
+     * {@link #setDefaultConfiguration(RealmConfiguration)}でセットされた{@link RealmConfiguration}
+     * にしたがって作成されたRealmインスタンスを返すstaticコンストラクタです。
      *
-     * @return an instance of the Realm class.
+     * @return Realmインスタンスを返します。
      *
-     * @throws java.lang.NullPointerException If no default configuration has been defined.
-     * @throws RealmMigrationNeededException If no migration has been provided by the default configuration and the
-     * model classes or version has has changed so a migration is required.
+     * @throws java.lang.NullPointerException デフォルトの{@link RealmConfiguration}がセットされて
+     *                                        いない場合にスローされます。
+     * @throws RealmMigrationNeededException  モデルクラスの変更やスキーマバージョンの変更により
+     *                                        マイグレーションが必要な状況で、デフォルトコンフィ
+     *                                        ギュレーションにマイグレーション処理が指定されていない
+     *                                        場合にスローされます。
      */
     public static Realm getDefaultInstance() {
         if (defaultConfiguration == null) {
@@ -202,15 +205,18 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Realm static constructor that returns the Realm instance defined by provided {@link io.realm.RealmConfiguration}
+     * 引き数で渡された{@link RealmConfiguration}に従ったRealmインスタンスを返すstaticコンストラクタです。
      *
-     * @param configuration {@link RealmConfiguration} used to open the Realm
-     * @return an instance of the Realm class
+     * @param configuration 取得する Realm の設定情報を保持した {@link RealmConfiguration}
+     * @return Realmインスタンスを返します。
      *
-     * @throws RealmMigrationNeededException If no migration has been provided by the configuration and the
-     * model classes or version has has changed so a migration is required.
-     * @throws RealmEncryptionNotSupportedException if the device doesn't support Realm encryption.
-     * @see RealmConfiguration for details on how to configure a Realm.
+     * @throws RealmMigrationNeededException        モデルクラスの変更やスキーマバージョンの変更により
+     *                                              マイグレーションが必要な状況で、デフォルト
+     *                                              コンフィギュレーションにマイグレーション処理が
+     *                                              指定されていない場合にスローされます。
+     * @throws RealmEncryptionNotSupportedException デバイスがRealmデータベースの暗号化に対応して
+     *                                              いない場合にスローされます。
+     * @see RealmConfiguration Realmの設定方法の詳細についてはこちらを参照してください。
      */
     public static Realm getInstance(RealmConfiguration configuration) {
         if (configuration == null) {
@@ -220,10 +226,11 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Sets the {@link io.realm.RealmConfiguration} used when calling {@link #getDefaultInstance()}.
+     * {@link #getDefaultInstance()}で使用する{@link io.realm.RealmConfiguration}をセットします。
      *
-     * @param configuration RealmConfiguration to use as the default configuration.
-     * @see RealmConfiguration for details on how to configure a Realm.
+     * @param configuration RealmConfiguration デフォルトコンフィギュレーションとして使用する
+     *                      {@link RealmConfiguration}。
+     * @see RealmConfiguration Realmの設定方法の詳細についてはこちらを参照してください。
      */
     public static void setDefaultConfiguration(RealmConfiguration configuration) {
         if (configuration == null) {
@@ -233,8 +240,9 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Removes the current default configuration (if any). Any further calls to {@link #getDefaultInstance()} will
-     * fail until a new default configuration has been set using {@link #setDefaultConfiguration(RealmConfiguration)}.
+     * デフォルトコンフィギュレーションを削除します。{@link #setDefaultConfiguration(RealmConfiguration)}
+     * で新たなデフォルトコンフィギュレーションがセットされるまで、以降の{@link #getDefaultInstance()}の
+     * 呼び出しは失敗します。
      */
     public static void removeDefaultConfiguration() {
         defaultConfiguration = null;
@@ -354,14 +362,15 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Create a Realm object for each object in a JSON array. This must be done within a transaction.
-     * JSON properties with a null value will map to the default value for the data type in Realm
-     * and unknown properties will be ignored.
+     * JSONArrayの中のそれぞれのオブジェクトに対してRealmオブジェクトを作成します。このメソッドは
+     * トランザクションの中で呼び出す必要があります。
+     * JSONプロパティのうち、値が{@code null}のものは対応するデータ型のデフォルト値に置き換えられます。
+     * また、モデルに含まれていないプロパティは無視します。
      *
-     * @param clazz Type of Realm objects to create.
-     * @param json  Array where each JSONObject must map to the specified class.
+     * @param clazz 作成するRealmオブジェクトの型。
+     * @param json  指定された種類のRealmオブジェクトに変換される要素を保持しているJSONArray。
      *
-     * @throws RealmException if mapping from JSON fails.
+     * @throws RealmException 変換が失敗した場合にスローされます。
      */
     public <E extends RealmObject> void createAllFromJson(Class<E> clazz, JSONArray json) {
         if (clazz == null || json == null) {
@@ -378,14 +387,14 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Tries to update a list of existing objects identified by their primary key with new JSON data. If an existing
-     * object could not be found in the Realm, a new object will be created. This must happen within a transaction.
+     * プライマリキーによって特定される既存オブジェクト群を、わたされたJSONデータで更新します。
+     * 対応する既存オブジェクトがRealm内に存在しない場合は、新規にオブジェクトの作成を行います。
+     * このメソッドはトランザクション内で呼び出す必要があります。
      *
-     * @param clazz Type of {@link io.realm.RealmObject} to create or update. It must have a primary key defined.
-     * @param json  Array with object data.
+     * @param clazz 作成/更新する{@link io.realm.RealmObject}の型。プライマリキーが指定されている必要があります。
+     * @param json  更新データを保持する JSONArray。
      *
-     * @throws java.lang.IllegalArgumentException if trying to update a class without a
-     * {@link io.realm.annotations.PrimaryKey}.
+     * @throws java.lang.IllegalArgumentException 指定された型が{@link io.realm.annotations.PrimaryKey}の指定されたプロパティを持っていない場合。
      * @see #createAllFromJson(Class, org.json.JSONArray)
      */
     public <E extends RealmObject> void createOrUpdateAllFromJson(Class<E> clazz, JSONArray json) {
@@ -403,14 +412,15 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Create a Realm object for each object in a JSON array. This must be done within a transaction.
-     * JSON properties with a null value will map to the default value for the data type in Realm
-     * and unknown properties will be ignored.
+     * 配列形式のJSON文字列中の各要素に対してそれぞれ対応するRealmオブジェクトを作成します。
+     * このメソッドはトランザクションの中で呼び出す必要があります。
+     * JSONプロパティのうち、値が{@code null}のものは対応するデータ型のデフォルト値に置き換えられます。
+     * また、モデルに含まれていないプロパティは無視します。
      *
-     * @param clazz Type of Realm objects to create.
-     * @param json  JSON array as a String where each object can map to the specified class.
+     * @param clazz 作成するRealmオブジェクトの型。
+     * @param json  指定された種類のRealmオブジェクトに変換される要素を保持している配列形式のJSON文字列。
      *
-     * @throws RealmException if mapping from JSON fails.
+     * @throws RealmException 変換が失敗した場合にスローされます。
      */
     public <E extends RealmObject> void createAllFromJson(Class<E> clazz, String json) {
         if (clazz == null || json == null || json.length() == 0) {
@@ -428,14 +438,14 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Tries to update a list of existing objects identified by their primary key with new JSON data. If an existing
-     * object could not be found in the Realm, a new object will be created. This must happen within a transaction.
+     * プライマリキーによって特定される既存オブジェクト群を、わたされたJSONデータで更新します。
+     * 対応する既存オブジェクトがRealm内に存在しない場合は、新規にオブジェクトの作成を行います。
+     * このメソッドはトランザクション内で呼び出す必要があります。
      *
-     * @param clazz Type of {@link io.realm.RealmObject} to create or update. It must have a primary key defined.
-     * @param json  String with an array of JSON objects.
+     * @param clazz 作成/更新する{@link io.realm.RealmObject}の型。プライマリキーが指定されている必要があります。
+     * @param json  JSON配列の文字列。
      *
-     * @throws java.lang.IllegalArgumentException if trying to update a class without a
-     * {@link io.realm.annotations.PrimaryKey}.
+     * @throws java.lang.IllegalArgumentException 指定された型が{@link io.realm.annotations.PrimaryKey}の指定されたプロパティを持っていない場合。
      * @see #createAllFromJson(Class, String)
      */
     public <E extends RealmObject> void createOrUpdateAllFromJson(Class<E> clazz, String json) {
@@ -455,16 +465,16 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Create a Realm object for each object in a JSON array. This must be done within a transaction.
-     * JSON properties with a null value will map to the default value for the data type in Realm
-     * and unknown properties will be ignored.
+     * 配列形式のJSON文字列中の各要素に対してそれぞれ対応するRealmオブジェクトを作成します。
+     * このメソッドはトランザクションの中で呼び出す必要があります。
+     * JSONプロパティのうち、値が{@code null}のものは対応するデータ型のデフォルト値に置き換えられます。
+     * また、モデルに含まれていないプロパティは無視します。
      *
-     * @param clazz         Type of Realm objects created.
-     * @param inputStream   JSON array as a InputStream. All objects in the array must be of the
-     *                      specified class.
+     * @param clazz       作成するRealmオブジェクトの型。
+     * @param inputStream 指定された種類のRealmオブジェクトに変換される要素を保持している配列形式のJSON文字列のストリーム。
      *
-     * @throws RealmException if mapping from JSON fails.
-     * @throws IOException if something was wrong with the input stream.
+     * @throws RealmException 変換が失敗した場合にスローされます。
+     * @throws IOException    {@code inputStream}からの読み込みに失敗した場合にスローされます。
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public <E extends RealmObject> void createAllFromJson(Class<E> clazz, InputStream inputStream) throws IOException {
@@ -485,14 +495,14 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Tries to update a list of existing objects identified by their primary key with new JSON data. If an existing
-     * object could not be found in the Realm, a new object will be created. This must happen within a transaction.
+     * プライマリキーによって特定される既存オブジェクト群を、わたされたJSONデータで更新します。
+     * 対応する既存オブジェクトがRealm内に存在しない場合は、新規にオブジェクトの作成を行います。
+     * このメソッドはトランザクション内で呼び出す必要があります。
      *
-     * @param clazz Type of {@link io.realm.RealmObject} to create or update. It must have a primary key defined.
-     * @param in    InputStream with a list of object data in JSON format.
+     * @param clazz 作成/更新する{@link io.realm.RealmObject}の型。プライマリキーが指定されている必要があります。
+     * @param in    指定された種類のRealmオブジェクトに変換される要素を保持している配列形式のJSON文字列のストリーム。
      *
-     * @throws java.lang.IllegalArgumentException if trying to update a class without a
-     * {@link io.realm.annotations.PrimaryKey}.
+     * @throws java.lang.IllegalArgumentException 指定された型が{@link io.realm.annotations.PrimaryKey}の指定されたプロパティを持っていない場合。
      * @see #createOrUpdateAllFromJson(Class, java.io.InputStream)
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -521,15 +531,16 @@ public final class Realm extends BaseRealm {
     }
 
     /**
-     * Create a Realm object pre-filled with data from a JSON object. This must be done inside a
-     * transaction. JSON properties with a null value will map to the default value for the data
-     * type in Realm and unknown properties will be ignored.
+     * JSONオブジェクトの保持するデータでRealmオブジェクトを作成します。
+     * このメソッドはトランザクションの中で呼び出す必要があります。
+     * JSONプロパティのうち、値が{@code null}のものは対応するデータ型のデフォルト値に置き換えられます。
+     * また、モデルに含まれていないプロパティは無視します。
      *
-     * @param clazz Type of Realm object to create.
-     * @param json  JSONObject with object data.
-     * @return Created object or null if no json data was provided.
+     * @param clazz 作成するRealmオブジェクトの型。
+     * @param json  作成するオブジェクトのデータを保持しているJSONObject。
+     * @return 作成されたRealmオブジェクト。{@code json}が{@code null}の場合は{@code null}を返します。
      *
-     * @throws RealmException if the mapping from JSON fails.
+     * @throws RealmException 変換が失敗した場合にスローされます。
      * @see #createOrUpdateObjectFromJson(Class, org.json.JSONObject)
      */
     public <E extends RealmObject> E createObjectFromJson(Class<E> clazz, JSONObject json) {
@@ -576,7 +587,7 @@ public final class Realm extends BaseRealm {
      * @param json  JSON string with object data.
      * @return Created object or null if json string was empty or null.
      *
-     * @throws RealmException if mapping to json failed.
+     * @throws RealmException 変換が失敗した場合にスローされます。
      */
     public <E extends RealmObject> E createObjectFromJson(Class<E> clazz, String json) {
         if (clazz == null || json == null || json.length() == 0) {
@@ -630,7 +641,7 @@ public final class Realm extends BaseRealm {
      * @param inputStream   JSON object data as a InputStream.
      * @return Created object or null if json string was empty or null.
      *
-     * @throws RealmException if the mapping from JSON failed.
+     * @throws RealmException 変換が失敗した場合にスローされます。
      * @throws IOException if something was wrong with the input stream.
      */
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
