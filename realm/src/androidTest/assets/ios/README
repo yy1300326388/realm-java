@@ -1,7 +1,30 @@
 This folder contains various Realm databases created on iOS and can be used to test interop with
 Realm-Android.
 
-The databases are generated using the following iOS code:
+The databases are generated using the below iOS code.
+Note that debugging must be disabled as it is currently (02/10-2015) not possible to debug encrypted
+Realms in Xcode.
+
+HOWTO
+
+1) Checkout realm-cocoa
+2) Open ~/realm-cocoa/ RealmExamples.xcodeproj in Xcode
+3) Replace /Simple/AppDelegate.m with the below code.
+4) Disable debugging. See below for how.
+5) Run Simple project.
+6) Copy/paste output Realm files into Java unit tests asset directory.
+
+
+DISABLE DEBUGGING:
+
+1) Click on spinner that chooses which Example to run
+2) At the bottom should be a button called "Edit Scheme".
+3) Choose "Run" if not selected already.
+4) Remove check in "Debug executable".
+5) Save and run.
+
+See the Log for where the output files are located.
+
 
 ////////////////////////////////////////////////////////////////////////////
 //
@@ -57,6 +80,12 @@ RLM_ARRAY_TYPE(AllTypes)
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
+
+    #if TARGET_IPHONE_SIMULATOR
+    // Print location of Documents folder?
+    NSLog(@"Documents Directory: %@", [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject]);
+    #endif
+
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     self.window.rootViewController = [[UIViewController alloc] init];
     [self.window makeKeyAndVisible];
@@ -64,7 +93,7 @@ RLM_ARRAY_TYPE(AllTypes)
     const unsigned char no_bytes[] = {};
     const unsigned char bytes[] = {1,2,3};
 
-    [AppDelegate setDefaultRealm: @"0.90.4-alltypes.realm"];
+    [AppDelegate setDefaultRealm: @"0.95.2-alltypes.realm"];
     RLMRealm *realm = [RLMRealm defaultRealm];
     [realm beginWriteTransaction];
     for (int i = 0; i < 10; i++) {
@@ -90,7 +119,7 @@ RLM_ARRAY_TYPE(AllTypes)
     }
     [realm commitWriteTransaction];
 
-    [AppDelegate setDefaultRealm: @"0.90.4-alltypes-default.realm"];
+    [AppDelegate setDefaultRealm: @"0.95.2-alltypes-default.realm"];
     realm = [RLMRealm defaultRealm];
     [realm beginWriteTransaction];
     IOSAllTypes *obj = [[IOSAllTypes alloc] init];
@@ -101,7 +130,7 @@ RLM_ARRAY_TYPE(AllTypes)
     [realm commitWriteTransaction];
 
 
-    [AppDelegate setDefaultRealm: @"0.90.4-alltypes-min.realm"];
+    [AppDelegate setDefaultRealm: @"0.95.2-alltypes-min.realm"];
     realm = [RLMRealm defaultRealm];
     [realm beginWriteTransaction];
     obj = [[IOSAllTypes alloc] init];
@@ -109,16 +138,16 @@ RLM_ARRAY_TYPE(AllTypes)
     obj.shortCol = SHRT_MIN;
     obj.intCol = INT_MIN;
     obj.longCol = LONG_MIN;
-    obj.floatCol = FLT_MIN;
-    obj.doubleCol = DBL_MIN;
+    obj.floatCol = -FLT_MAX;
+    obj.doubleCol = -DBL_MAX;
     obj.byteCol = [NSData dataWithBytes:no_bytes length:sizeof(no_bytes)];
     obj.stringCol = @"";
-    obj.dateCol = [NSDate dateWithTimeIntervalSince1970: 0];
+    obj.dateCol = [NSDate dateWithTimeIntervalSinceReferenceDate: (NSTimeInterval) -DBL_MAX];
     [realm addObject:obj];
     [realm commitWriteTransaction];
 
 
-    [AppDelegate setDefaultRealm: @"0.90.4-alltypes-max.realm"];
+    [AppDelegate setDefaultRealm: @"0.95.2-alltypes-max.realm"];
     realm = [RLMRealm defaultRealm];
     [realm beginWriteTransaction];
     obj = [[IOSAllTypes alloc] init];
@@ -130,12 +159,12 @@ RLM_ARRAY_TYPE(AllTypes)
     obj.doubleCol = DBL_MAX;
     obj.byteCol = [NSData dataWithBytes:no_bytes length:sizeof(no_bytes)];
     obj.stringCol = @"";
-    obj.dateCol = [NSDate dateWithTimeIntervalSince1970: LONG_MAX];
+    obj.dateCol = [NSDate dateWithTimeIntervalSinceReferenceDate: (NSTimeInterval) DBL_MAX];
     [realm addObject:obj];
     [realm commitWriteTransaction];
 
 
-    [AppDelegate setDefaultRealm: @"0.90.5-alltypes-default-encrypted.realm"];
+    [AppDelegate setDefaultRealm: @"0.95.2-alltypes-default-encrypted.realm"];
     uint8_t buffer[64];
     for (int i = 0; i < sizeof(buffer); i++) {
         buffer[i] = 1;
