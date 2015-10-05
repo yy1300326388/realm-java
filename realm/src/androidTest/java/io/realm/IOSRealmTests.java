@@ -106,7 +106,7 @@ public class IOSRealmTests extends AndroidTestCase {
     }
 
     public void testIOSDatatypesMaximumValues() throws IOException {
-        TestHelper.prepareDatabaseFromAssets(getContext(), "ios/0.90.4-alltypes-max.realm", REALM_NAME);
+        TestHelper.prepareDatabaseFromAssets(getContext(), "ios/0.95.2-alltypes-max.realm", REALM_NAME);
         realm = Realm.getDefaultInstance();
 
         IOSAllTypes obj = realm.allObjects(IOSAllTypes.class).first();
