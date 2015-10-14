@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.realm.examples.intro.model;
+package io.realm.examples.arm64stress.model;
 
 import io.realm.RealmObject;
 

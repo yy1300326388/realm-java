@@ -11,7 +11,9 @@ include ':introExample',
         ':jsonExample',
         ':realmModuleAppExample',
         ':realmModuleLibraryExample',
-        ':kotlinExample'
+        ':kotlinExample',
+        ':arm64StressTest'
+
 
 project(':introExample').projectDir = file('examples/introExample')
 project(':gridViewExample').projectDir = file('examples/gridViewExample')
@@ -23,6 +25,7 @@ project(':jsonExample').projectDir = file('examples/jsonExample')
 project(':realmModuleAppExample').projectDir = file('examples/realmModuleExample/app')
 project(':realmModuleLibraryExample').projectDir = file('examples/realmModuleExample/library')
 project(':kotlinExample').projectDir = file('examples/kotlinExample')
+project(':arm64StressTest').projectDir = file('examples/arm64StressTest')
 
 // Experimental projects
 include ':pathExperiment'
