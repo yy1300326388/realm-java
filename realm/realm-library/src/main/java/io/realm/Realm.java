@@ -698,6 +698,40 @@ public final class Realm extends BaseRealm {
     }
 
     /**
+     * Instantiates and adds a new object to the Realm. It will reuse the old object instead of creating a completely
+     * new object.
+     *
+     * The old object is effectively an Object Pool. This can be useful in tight loops like creating many objects as it
+     * preserves system resources and reduces the risk of garbage collection.
+     *
+     * An example could be this:
+     *
+     * {@code
+     *   Person p = realm.createObject(Person.class);
+     *   p.setName(names.get(0));
+     *   for (int i = 1; i < 1000; i++) {
+     *       p = realm.createObject(Person.class, p);
+     *       p.setName(names.get(i));
+     *   }
+     * }
+     *
+     * @param clazz The Class of the object to create
+     * @param reusableObject and old instance of the same type. It's internal state will be replaced by the new objects field values.
+     * @return The newly created object.
+     * @see <a href="https://en.wikipedia.org/wiki/Object_pool_pattern">https://en.wikipedia.org/wiki/Object_pool_pattern</a>
+     */
+    public <E extends RealmObject> E createObject(Class<E> clazz, E reusableObject) {
+        checkIfValid();
+        Table table = getTable(clazz);
+        long rowIndex = table.addEmptyRow();
+        return get(clazz, rowIndex);
+    }
+
+
+
+
+
+    /**
      * Creates a new object inside the Realm with the Primary key value initially set.
      * If the value violates the primary key constraint, no object will be added and a
      * {@link RealmException} will be thrown.
@@ -718,9 +752,17 @@ public final class Realm extends BaseRealm {
     }
 
     <E extends RealmObject> E get(Class<E> clazz, long rowIndex) {
+        return get(clazz, rowIndex, null);
+    }
+
+
+    <E extends RealmObject> E get(Class<E> clazz, long rowIndex, E resusableObject) {
         Table table = getTable(clazz);
-        UncheckedRow row = table.getUncheckedRow(rowIndex);
-        E result = configuration.getSchemaMediator().newInstance(clazz, getColumnInfo(clazz));
+        UncheckedRow row = table.getUncheckedRow(rowIndex); // TODO Round 2 also reuse Row object
+        E result = resusableObject;
+        if (result == null) {
+            result = configuration.getSchemaMediator().newInstance(clazz, getColumnInfo(clazz));
+        }
         result.row = row;
         result.realm = this;
         return result;

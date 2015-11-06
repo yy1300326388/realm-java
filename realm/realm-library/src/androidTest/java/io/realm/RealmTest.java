@@ -18,6 +18,7 @@ package io.realm;
 import android.content.Context;
 import android.os.SystemClock;
 import android.test.AndroidTestCase;
+import android.util.Log;
 
 import junit.framework.AssertionFailedError;
 
@@ -127,6 +128,37 @@ public class RealmTest extends AndroidTestCase {
         }
         realm.commitTransaction();
     }
+
+    public void testSpeed() {
+        long objects = 100000;
+
+        testRealm.beginTransaction();
+        long start = System.currentTimeMillis();
+        AllTypes types = testRealm.createObject(AllTypes.class);
+        types.setColumnLong(1);
+        for (long i = 1; i < objects; i++) {
+            types = testRealm.createObject(AllTypes.class, types);
+            types.setColumnLong(1);
+        }
+        long end = System.currentTimeMillis();
+        testRealm.cancelTransaction();
+        Log.e("Bench", "Reuse: " + (end - start));
+
+        testRealm.beginTransaction();
+        start = System.currentTimeMillis();
+        types = testRealm.createObject(AllTypes.class);
+        types.setColumnLong(1);
+        for (long i = 1; i < objects; i++) {
+            types = testRealm.createObject(AllTypes.class);
+            types.setColumnLong(1);
+        }
+        end = System.currentTimeMillis();
+        testRealm.cancelTransaction();
+        Log.e("Bench", "No reuse: " + (end - start));
+    }
+
+
+
 
     private void populateTestRealm() {
         populateTestRealm(testRealm, TEST_DATA_SIZE);
