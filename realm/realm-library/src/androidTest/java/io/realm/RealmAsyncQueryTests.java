@@ -26,6 +26,7 @@ import android.test.InstrumentationTestCase;
 import junit.framework.AssertionFailedError;
 
 import java.lang.ref.WeakReference;
+import java.sql.Connection;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
@@ -45,6 +46,42 @@ import io.realm.internal.log.RealmLog;
 import io.realm.proxy.HandlerProxy;
 
 public class RealmAsyncQueryTests extends InstrumentationTestCase {
+
+    private HandlerThread handlerThread;
+    private Handler handler;
+    private Realm realm;
+    private RealmConfiguration configuration;
+
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        handlerThread = new HandlerThread("LooperThread");
+        handlerThread.start();
+        handler = new Handler(handlerThread.getLooper());
+        configuration = TestHelper.createConfiguration(getInstrumentation().getContext());
+    }
+
+    @Override
+    protected void tearDown() throws Exception {
+        final CountDownLatch cleanup = new CountDownLatch(1);
+        if (realm != null && handler.getLooper().getThread().isAlive()) {
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (!realm.isClosed()) {
+                        realm.close();
+                    }
+                    Realm.deleteRealm(configuration);
+                    handlerThread.quit();
+                    realm = null;
+                    cleanup.countDown();
+                }
+            });
+            TestHelper.awaitOrFail(cleanup);
+        }
+    }
+
+
     // ****************************
     // ****  Async transaction  ***
     // ****************************
@@ -2824,5 +2861,43 @@ public class RealmAsyncQueryTests extends InstrumentationTestCase {
             }
         }
         realm.commitTransaction();
+    }
+
+    public void test_async_subquery() {
+        final CountDownLatch signalTestFinished = new CountDownLatch(1);
+        final AtomicInteger resultSize = new AtomicInteger(0);
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                realm = Realm.getInstance(configuration);
+                realm.executeTransaction(new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        AllTypes obj = realm.createObject(AllTypes.class);
+                        obj.setColumnBoolean(true);
+                        obj.setColumnLong(1);
+
+                        obj = realm.createObject(AllTypes.class);
+                        obj.setColumnBoolean(false);
+                        obj.setColumnLong(1);
+                    }
+                });
+
+                RealmResults<AllTypes> results = realm.where(AllTypes.class).equalTo(AllTypes.FIELD_BOOLEAN, true).findAll();
+                final RealmResults<AllTypes> subResults = results.where().equalTo(AllTypes.FIELD_LONG, 1).findAllAsync();
+                subResults.addChangeListener(new RealmChangeListener() {
+                    @Override
+                    public void onChange() {
+                        if (subResults.isLoaded()) {
+                            resultSize.set(subResults.size());
+                            signalTestFinished.countDown();
+                        }
+                    }
+                });
+            }
+        });
+
+        TestHelper.awaitOrFail(signalTestFinished);
+        assertEquals(1, resultSize.get());
     }
 }
