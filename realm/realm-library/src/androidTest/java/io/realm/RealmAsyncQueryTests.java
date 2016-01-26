@@ -2419,16 +2419,16 @@ public class RealmAsyncQueryTests {
     @Test
     @RunTestInLooperThread
     public void testAsyncTransactionWorksWithAsyncQuery() {
-        RealmResults<AllTypes> results = workerThread.realm.where(AllTypes.class).findAllAsync();
+        RealmResults<AllTypes> results = looperThread.realm.where(AllTypes.class).findAllAsync();
         results.addChangeListener(new RealmChangeListener() {
             @Override
             public void onChange() {
                 //assertEquals(workerThread.realm.where(AllTypes.class).count(), 1);
             }
         });
-        workerThread.keepStrongReference.add(results);
+        looperThread.keepStrongReference.add(results);
 
-        workerThread.realm.executeTransaction(new Realm.Transaction() {
+        looperThread.realm.executeTransaction(new Realm.Transaction() {
             @Override
             public void execute(Realm realm) {
                 realm.createObject(AllTypes.class);
@@ -2436,8 +2436,8 @@ public class RealmAsyncQueryTests {
         }, new Realm.Transaction.Callback() {
             @Override
             public void onSuccess() {
-                assertEquals(workerThread.realm.where(AllTypes.class).count(), 1);
-                workerThread.signalTestCompleted.countDown();
+                assertEquals(looperThread.realm.where(AllTypes.class).count(), 1);
+                looperThread.testComplete();
             }
 
             @Override
