@@ -21,6 +21,8 @@ import io.realm.RealmObject;
 public class Util {
 
     static {
+        // Any internal class with static native methods that uses Realm Core must load the Realm Core library
+        // themselves as it otherwise might not have been loaded.
         RealmCore.loadLibrary();
     }
 
@@ -64,7 +66,8 @@ public class Util {
         Exception_RowInvalid(13),
         Exception_EncryptionNotSupported(14),
         Exception_CrossTableLink(15),
-        Exception_BadVersion(16);
+        Exception_BadVersion(16),
+        Exception_DeletedLinkView(17);
 
         private final int nativeTestcase;
         Testcase(int nativeValue) {
