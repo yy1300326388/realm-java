@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package io.realm.examples.intro;
+package io.realm.examples.benchmarks;
 
 import android.app.Activity;
 import android.os.AsyncTask;
@@ -26,9 +26,9 @@ import android.widget.TextView;
 import io.realm.Realm;
 import io.realm.RealmResults;
 import io.realm.Sort;
-import io.realm.examples.intro.model.Cat;
-import io.realm.examples.intro.model.Dog;
-import io.realm.examples.intro.model.Person;
+import io.realm.examples.benchmarks.model.Cat;
+import io.realm.examples.benchmarks.model.Dog;
+import io.realm.examples.benchmarks.model.Person;
 
 public class IntroExampleActivity extends Activity {
 

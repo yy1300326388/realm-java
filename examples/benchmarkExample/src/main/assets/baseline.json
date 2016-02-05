@@ -1,0 +1,824 @@
+[
+{
+"experiment": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "directComparison",
+"parameters": {
+"value": "java.util.Date"
+}
+},
+"instrumentation": {},
+"userParameters": {
+"value": "java.util.Date"
+}
+},
+"id": "836f2cb8-5ba3-4159-8719-434cdb6b86dd",
+"instrumentSpec": {
+"className": "dk.ilios.spanner.internal.RuntimeInstrument",
+"options": {
+"class": "dk.ilios.spanner.internal.RuntimeInstrument",
+"gcBeforeEach": "true",
+"maxWarmupWall_time": "10",
+"maxWarmupWall_unit": "MINUTES",
+"measurements": "9",
+"suggestGranularity": "true",
+"timingInterval_time": "500",
+"timingInterval_unit": "MILLISECONDS",
+"warmup_time": "0",
+"warmup_unit": "SECONDS"
+}
+},
+"measurements": [
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 1.3133695E7,
+"unit": "ns"
+},
+"weight": 9163985.0
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 3.76891011E8,
+"unit": "ns"
+},
+"weight": 2.65984915E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 6.93433977E8,
+"unit": "ns"
+},
+"weight": 4.84799057E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 3.35815603E8,
+"unit": "ns"
+},
+"weight": 2.40141029E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.44246612E8,
+"unit": "ns"
+},
+"weight": 3.1778881E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.56048991E8,
+"unit": "ns"
+},
+"weight": 3.89532151E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.41618864E8,
+"unit": "ns"
+},
+"weight": 3.80560415E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.98777249E8,
+"unit": "ns"
+},
+"weight": 3.46306685E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.70322452E8,
+"unit": "ns"
+},
+"weight": 3.36929411E8
+}
+],
+"messages": [],
+"run": {
+"id": "c5966f97-a1e4-4dce-adea-88e7ab969f77",
+"label": "Spanner benchmark test",
+"startTime": "2015-11-14T07:24:51.997Z"
+},
+"scenario": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "directComparison",
+"parameters": {
+"value": "java.util.Date"
+}
+},
+"hash": 0,
+"host": {
+"id": 0,
+"properties": {}
+},
+"id": 0
+}
+},
+{
+"experiment": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "directComparison",
+"parameters": {
+"value": "java.lang.Object"
+}
+},
+"instrumentation": {},
+"userParameters": {
+"value": "java.lang.Object"
+}
+},
+"id": "3fccc9d1-9c5a-4e39-b169-7a1f06d3f687",
+"instrumentSpec": {
+"className": "dk.ilios.spanner.internal.RuntimeInstrument",
+"options": {
+"class": "dk.ilios.spanner.internal.RuntimeInstrument",
+"gcBeforeEach": "true",
+"maxWarmupWall_time": "10",
+"maxWarmupWall_unit": "MINUTES",
+"measurements": "9",
+"suggestGranularity": "true",
+"timingInterval_time": "500",
+"timingInterval_unit": "MILLISECONDS",
+"warmup_time": "0",
+"warmup_unit": "SECONDS"
+}
+},
+"measurements": [
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 1.5262472E7,
+"unit": "ns"
+},
+"weight": 6215150.0
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 2.32757944E8,
+"unit": "ns"
+},
+"weight": 1.73186503E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 3.90975949E8,
+"unit": "ns"
+},
+"weight": 3.08735546E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.64148033E8,
+"unit": "ns"
+},
+"weight": 4.17999414E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.94897649E8,
+"unit": "ns"
+},
+"weight": 3.81973895E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.62732741E8,
+"unit": "ns"
+},
+"weight": 3.61973006E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.44800324E8,
+"unit": "ns"
+},
+"weight": 4.14640431E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 3.92510609E8,
+"unit": "ns"
+},
+"weight": 3.01769208E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.36006726E8,
+"unit": "ns"
+},
+"weight": 4.14132268E8
+}
+],
+"messages": [],
+"run": {
+"id": "c5966f97-a1e4-4dce-adea-88e7ab969f77",
+"label": "Spanner benchmark test",
+"startTime": "2015-11-14T07:24:51.997Z"
+},
+"scenario": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "directComparison",
+"parameters": {
+"value": "java.lang.Object"
+}
+},
+"hash": 0,
+"host": {
+"id": 0,
+"properties": {}
+},
+"id": 0
+}
+},
+{
+"experiment": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "equalsTo",
+"parameters": {
+"value": "java.util.Date"
+}
+},
+"instrumentation": {},
+"userParameters": {
+"value": "java.util.Date"
+}
+},
+"id": "6ce06f5d-0720-4e61-97b4-ff06be714f25",
+"instrumentSpec": {
+"className": "dk.ilios.spanner.internal.RuntimeInstrument",
+"options": {
+"class": "dk.ilios.spanner.internal.RuntimeInstrument",
+"gcBeforeEach": "true",
+"maxWarmupWall_time": "10",
+"maxWarmupWall_unit": "MINUTES",
+"measurements": "9",
+"suggestGranularity": "true",
+"timingInterval_time": "500",
+"timingInterval_unit": "MILLISECONDS",
+"warmup_time": "0",
+"warmup_unit": "SECONDS"
+}
+},
+"measurements": [
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 3.7933142E7,
+"unit": "ns"
+},
+"weight": 9183367.0
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.51525781E8,
+"unit": "ns"
+},
+"weight": 1.24913794E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.6190702E8,
+"unit": "ns"
+},
+"weight": 1.6026729E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.79482682E8,
+"unit": "ns"
+},
+"weight": 1.56646901E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.09073929E8,
+"unit": "ns"
+},
+"weight": 1.11807548E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.88940617E8,
+"unit": "ns"
+},
+"weight": 1.31760064E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.14093941E8,
+"unit": "ns"
+},
+"weight": 1.42975174E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.75453542E8,
+"unit": "ns"
+},
+"weight": 1.26860418E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.58054071E8,
+"unit": "ns"
+},
+"weight": 1.23083993E8
+}
+],
+"messages": [],
+"run": {
+"id": "c5966f97-a1e4-4dce-adea-88e7ab969f77",
+"label": "Spanner benchmark test",
+"startTime": "2015-11-14T07:24:51.997Z"
+},
+"scenario": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "equalsTo",
+"parameters": {
+"value": "java.util.Date"
+}
+},
+"hash": 0,
+"host": {
+"id": 0,
+"properties": {}
+},
+"id": 0
+}
+},
+{
+"experiment": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "equalsTo",
+"parameters": {
+"value": "java.lang.Object"
+}
+},
+"instrumentation": {},
+"userParameters": {
+"value": "java.lang.Object"
+}
+},
+"id": "e35edb10-6944-4087-9883-95b0588beca9",
+"instrumentSpec": {
+"className": "dk.ilios.spanner.internal.RuntimeInstrument",
+"options": {
+"class": "dk.ilios.spanner.internal.RuntimeInstrument",
+"gcBeforeEach": "true",
+"maxWarmupWall_time": "10",
+"maxWarmupWall_unit": "MINUTES",
+"measurements": "9",
+"suggestGranularity": "true",
+"timingInterval_time": "500",
+"timingInterval_unit": "MILLISECONDS",
+"warmup_time": "0",
+"warmup_unit": "SECONDS"
+}
+},
+"measurements": [
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 3.5870944E7,
+"unit": "ns"
+},
+"weight": 9888769.0
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.79586706E8,
+"unit": "ns"
+},
+"weight": 1.65859817E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.58567149E8,
+"unit": "ns"
+},
+"weight": 1.58696048E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 6.28776106E8,
+"unit": "ns"
+},
+"weight": 1.79662101E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 3.44554854E8,
+"unit": "ns"
+},
+"weight": 9.8591515E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.08594857E8,
+"unit": "ns"
+},
+"weight": 1.45464869E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.92919677E8,
+"unit": "ns"
+},
+"weight": 1.46748716E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.19385471E8,
+"unit": "ns"
+},
+"weight": 1.19126755E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.97950803E8,
+"unit": "ns"
+},
+"weight": 1.69341444E8
+}
+],
+"messages": [],
+"run": {
+"id": "c5966f97-a1e4-4dce-adea-88e7ab969f77",
+"label": "Spanner benchmark test",
+"startTime": "2015-11-14T07:24:51.997Z"
+},
+"scenario": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "equalsTo",
+"parameters": {
+"value": "java.lang.Object"
+}
+},
+"hash": 0,
+"host": {
+"id": 0,
+"properties": {}
+},
+"id": 0
+}
+},
+{
+"experiment": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "instanceOf",
+"parameters": {
+"value": "java.util.Date"
+}
+},
+"instrumentation": {},
+"userParameters": {
+"value": "java.util.Date"
+}
+},
+"id": "306e4b4d-9eda-4c74-be90-cfa91a82aa80",
+"instrumentSpec": {
+"className": "dk.ilios.spanner.internal.RuntimeInstrument",
+"options": {
+"class": "dk.ilios.spanner.internal.RuntimeInstrument",
+"gcBeforeEach": "true",
+"maxWarmupWall_time": "10",
+"maxWarmupWall_unit": "MINUTES",
+"measurements": "9",
+"suggestGranularity": "true",
+"timingInterval_time": "500",
+"timingInterval_unit": "MILLISECONDS",
+"warmup_time": "0",
+"warmup_unit": "SECONDS"
+}
+},
+"measurements": [
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 3.640854E7,
+"unit": "ns"
+},
+"weight": 5496163.0
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.88375187E8,
+"unit": "ns"
+},
+"weight": 9.5618436E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 6.29295166E8,
+"unit": "ns"
+},
+"weight": 1.03528751E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.13429211E8,
+"unit": "ns"
+},
+"weight": 8.205994E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 6.30452822E8,
+"unit": "ns"
+},
+"weight": 1.04881318E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.43359636E8,
+"unit": "ns"
+},
+"weight": 9.191556E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.23927341E8,
+"unit": "ns"
+},
+"weight": 8.6396358E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 6.35471039E8,
+"unit": "ns"
+},
+"weight": 1.03397189E8
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 6.14843474E8,
+"unit": "ns"
+},
+"weight": 1.0098216E8
+}
+],
+"messages": [],
+"run": {
+"id": "c5966f97-a1e4-4dce-adea-88e7ab969f77",
+"label": "Spanner benchmark test",
+"startTime": "2015-11-14T07:24:51.997Z"
+},
+"scenario": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "instanceOf",
+"parameters": {
+"value": "java.util.Date"
+}
+},
+"hash": 0,
+"host": {
+"id": 0,
+"properties": {}
+},
+"id": 0
+}
+},
+{
+"experiment": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "instanceOf",
+"parameters": {
+"value": "java.lang.Object"
+}
+},
+"instrumentation": {},
+"userParameters": {
+"value": "java.lang.Object"
+}
+},
+"id": "923b14bf-064e-439e-8ed0-9059b0c68c03",
+"instrumentSpec": {
+"className": "dk.ilios.spanner.internal.RuntimeInstrument",
+"options": {
+"class": "dk.ilios.spanner.internal.RuntimeInstrument",
+"gcBeforeEach": "true",
+"maxWarmupWall_time": "10",
+"maxWarmupWall_unit": "MINUTES",
+"measurements": "9",
+"suggestGranularity": "true",
+"timingInterval_time": "500",
+"timingInterval_unit": "MILLISECONDS",
+"warmup_time": "0",
+"warmup_unit": "SECONDS"
+}
+},
+"measurements": [
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 2.6193064E7,
+"unit": "ns"
+},
+"weight": 4094090.0
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.1387238E8,
+"unit": "ns"
+},
+"weight": 6.6191291E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.80905262E8,
+"unit": "ns"
+},
+"weight": 7.9481244E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 4.60325916E8,
+"unit": "ns"
+},
+"weight": 7.5996545E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.8091755E8,
+"unit": "ns"
+},
+"weight": 9.6024554E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.13031854E8,
+"unit": "ns"
+},
+"weight": 8.5356024E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.07569495E8,
+"unit": "ns"
+},
+"weight": 8.4074289E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.89744784E8,
+"unit": "ns"
+},
+"weight": 9.8094721E7
+},
+{
+"description": "runtime",
+"id": 0,
+"value": {
+"magnitude": 5.48990179E8,
+"unit": "ns"
+},
+"weight": 9.1722102E7
+}
+],
+"messages": [],
+"run": {
+"id": "c5966f97-a1e4-4dce-adea-88e7ab969f77",
+"label": "Spanner benchmark test",
+"startTime": "2015-11-14T07:24:51.997Z"
+},
+"scenario": {
+"benchmarkSpec": {
+"className": "dk.ilios.spanner.UnitTestBenchmarks",
+"id": 0,
+"methodName": "instanceOf",
+"parameters": {
+"value": "java.lang.Object"
+}
+},
+"hash": 0,
+"host": {
+"id": 0,
+"properties": {}
+},
+"id": 0
+}
+}
+]
