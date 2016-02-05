@@ -14,8 +14,7 @@ import dk.ilios.spanner.SpannerConfig;
 import io.realm.Realm;
 import io.realm.RealmConfiguration;
 import io.realm.RealmList;
-import io.realm.examples.benchmarks.model.AllTypes;
-import io.realm.examples.benchmarks.model.Dog;
+import io.realm.examples.benchmarks.model.SimpleAllTypes;
 
 public class Benchmarks {
 
@@ -37,7 +36,7 @@ public class Benchmarks {
 
     // Private fields used by benchmark methods
     private Class testClass;
-    private List<AllTypes> list;
+    private List<SimpleAllTypes> list;
     private Realm realm;
 
     @BeforeExperiment
@@ -47,18 +46,18 @@ public class Benchmarks {
         realm = Realm.getInstance(config);
         list = new ArrayList();
         for (int i = 0; i < 10; i++) {
-            AllTypes allTypes = new AllTypes();
+            SimpleAllTypes allTypes = new SimpleAllTypes();
             allTypes.setColumnBoolean((i % 3) == 0);
-            allTypes.setColumnBinary(new byte[]{1, 2, 3});
-            allTypes.setColumnDate(new Date(1000));
+//            allTypes.setColumnBinary(new byte[]{1, 2, 3});
+//            allTypes.setColumnDate(new Date(1000));
             allTypes.setColumnDouble(3.1415);
             allTypes.setColumnFloat(1.234567f + i);
             allTypes.setColumnString("test data " + i);
             allTypes.setColumnLong(i);
 
-            RealmList<Dog> dogs = new RealmList<>(new Dog("White"), new Dog("Black"));
-            allTypes.setColumnRealmObject(dogs.get(i));
-            allTypes.setColumnRealmList(dogs);
+//            RealmList<Dog> dogs = new RealmList<>(new Dog("White"), new Dog("Black"));
+//            allTypes.setColumnRealmObject(dogs.get(i));
+//            allTypes.setColumnRealmList(dogs);
         }
 
 
