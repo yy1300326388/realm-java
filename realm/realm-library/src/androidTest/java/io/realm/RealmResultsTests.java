@@ -1547,4 +1547,47 @@ public class RealmResultsTests {
             assertEquals("The RealmList which this RealmResults is created on has been deleted.", e.getMessage());
         }
     }
+
+    @Test
+    public void linkQueries() {
+        realm.beginTransaction();
+        realm.clear();
+        realm.commitTransaction();
+
+        realm.beginTransaction();
+        Dog fido = realm.createObject(Dog.class);
+        fido.setName("Fido");
+        fido.setAge(12);
+
+        Dog fluffy8 = realm.createObject(Dog.class);
+        fluffy8.setName("Fluffy");
+        fluffy8.setAge(8);
+
+        Dog fluffy12 = realm.createObject(Dog.class);
+        fluffy12.setName("Fluffy");
+        fluffy12.setAge(12);
+
+        Owner john = realm.createObject(Owner.class);
+        john.setName("John");
+        john.getDogs().add(fido);
+        john.getDogs().add(fluffy8);
+
+        Owner jim = realm.createObject(Owner.class);
+        jim.setName("Jim");
+        jim.getDogs().add(fluffy8);
+        jim.getDogs().add(fluffy12);
+        realm.commitTransaction();
+
+        RealmResults<Owner> rr = realm.where(Owner.class).equalTo("dogs.name", "Fluffy").equalTo("dogs.age", 12).findAll();
+        assertEquals(2, rr.size());
+
+        RealmResults<Owner> rr1 =  realm.where(Owner.class).equalTo("dogs.name", "Fluffy").findAll();
+        assertEquals(2, rr1.size());
+
+        RealmResults<Owner> rr2 = rr1.where().equalTo("dogs.age", 12).findAll();
+        assertEquals(2, rr2.size());
+
+        RealmResults<Dog> dogs = realm.where(Dog.class).equalTo("name", "Fluffy").equalTo("age", 12).findAll();
+        assertEquals(1, dogs.size());
+    }
 }
