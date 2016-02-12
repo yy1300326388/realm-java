@@ -1,8 +1,30 @@
 This folder contains various Realm databases created on iOS and can be used to test interop with
 Realm-Android.
 
-The databases are generated using the following iOS code:
+The databases are generated using the below iOS code.
+Note that debugging must be disabled as it is currently (02/10-2015) not possible to debug encrypted
+Realms in Xcode.
 
+HOWTO
+
+1) Checkout realm-cocoa
+2) Open ~/realm-cocoa/RealmExamples.xcodeproj in Xcode
+3) Replace /Simple/AppDelegate.m with the below code.
+4) Disable debugging. See below for how.
+5) Run Simple project.
+6) Copy/paste output Realm files into Java unit tests asset directory.
+
+DISABLE DEBUGGING:
+
+1) Click on spinner that chooses which Example to run
+2) At the bottom should be a button called "Edit Scheme".
+3) Choose "Run" if not selected already.
+4) Remove check in "Debug executable".
+5) Save and run.
+
+See the Log for where the output files are located.
+
+```objective-c  
 ////////////////////////////////////////////////////////////////////////////
 //
 // Copyright 2015 Realm Inc.
@@ -49,9 +71,9 @@ RLM_ARRAY_TYPE(IOSChild)
 RLM_ARRAY_TYPE(AllTypes)
 
 @implementation IOSAllTypes
-//+ (NSString *)primaryKey {
-//    return @"id";
-//}
++ (NSString *)primaryKey {
+    return @"id";
+}
 @end
 
 @implementation AppDelegate
@@ -80,6 +102,7 @@ RLM_ARRAY_TYPE(AllTypes)
     [realm beginWriteTransaction];
     for (int i = 0; i < 10; i++) {
         IOSAllTypes *obj = [[IOSAllTypes alloc] init];
+        obj.id = i + 1;
         obj.boolCol = TRUE;
         obj.shortCol = 1 + i;
         obj.intCol = 10 + i;
@@ -163,3 +186,4 @@ RLM_ARRAY_TYPE(AllTypes)
     return YES;
 }
 @end
+```
