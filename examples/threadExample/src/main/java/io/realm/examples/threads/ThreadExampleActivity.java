@@ -30,7 +30,6 @@ import java.util.Locale;
 
 public class ThreadExampleActivity extends ActionBarActivity implements android.support.v7.app.ActionBar.TabListener {
 
-    private SectionsPagerAdapter pageAdapter;
     private ViewPager viewPager;
 
     @Override
@@ -42,7 +41,7 @@ public class ThreadExampleActivity extends ActionBarActivity implements android.
         final android.support.v7.app.ActionBar actionBar = getSupportActionBar();
         actionBar.setNavigationMode(android.support.v7.app.ActionBar.NAVIGATION_MODE_TABS);
 
-        pageAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        SectionsPagerAdapter pageAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager = (ViewPager) findViewById(R.id.pager);
         viewPager.setAdapter(pageAdapter);
 
@@ -87,13 +86,15 @@ public class ThreadExampleActivity extends ActionBarActivity implements android.
             switch(position) {
                 case 0: return new ThreadFragment();
                 case 1: return new AsyncTaskFragment();
+                case 2: return new AsyncQueryFragment();
+                case 3: return new PassingObjectsFragment();
                 default: return null;
             }
         }
 
         @Override
         public int getCount() {
-            return 2;
+            return 4;
         }
 
         @Override
@@ -102,6 +103,8 @@ public class ThreadExampleActivity extends ActionBarActivity implements android.
             switch (position) {
                 case 0: return getString(R.string.title_section1).toUpperCase(l);
                 case 1: return getString(R.string.title_section2).toUpperCase(l);
+                case 2: return getString(R.string.title_section3).toUpperCase(l);
+                case 3: return getString(R.string.title_section4).toUpperCase(l);
                 default: return null;
             }
         }

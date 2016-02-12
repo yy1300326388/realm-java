@@ -25,10 +25,10 @@ import android.widget.TextView;
 
 import io.realm.Realm;
 import io.realm.RealmResults;
+import io.realm.Sort;
 import io.realm.examples.intro.model.Cat;
 import io.realm.examples.intro.model.Dog;
 import io.realm.examples.intro.model.Person;
-
 
 public class IntroExampleActivity extends Activity {
 
@@ -47,7 +47,7 @@ public class IntroExampleActivity extends Activity {
         // These operations are small enough that
         // we can generally safely run them on the UI thread.
 
-        // Open the default realm for the UI thread.
+        // Open the default Realm for the UI thread.
         realm = Realm.getInstance(this);
 
         basicCRUD(realm);
@@ -96,14 +96,14 @@ public class IntroExampleActivity extends Activity {
         person.setName("Young Person");
         person.setAge(14);
 
-        // When the write transaction is committed, all changes a synced to disk.
+        // When the transaction is committed, all changes a synced to disk.
         realm.commitTransaction();
 
         // Find the first person (no query conditions) and read a field
         person = realm.where(Person.class).findFirst();
         showStatus(person.getName() + ":" + person.getAge());
 
-        // Update person in a write transaction
+        // Update person in a transaction
         realm.beginTransaction();
         person.setName("Senior Person");
         person.setAge(99);
@@ -141,7 +141,7 @@ public class IntroExampleActivity extends Activity {
         // Those can not be transferred across threads.
         Realm realm = Realm.getInstance(this);
 
-        // Add ten persons in one write transaction
+        // Add ten persons in one transaction
         realm.beginTransaction();
         Dog fido = realm.createObject(Dog.class);
         fido.setName("fido");
@@ -187,7 +187,7 @@ public class IntroExampleActivity extends Activity {
 
         // Sorting
         RealmResults<Person> sortedPersons = realm.allObjects(Person.class);
-        sortedPersons.sort("age", false);
+        sortedPersons.sort("age", Sort.DESCENDING);
         assert(realm.allObjects(Person.class).last().getName() == sortedPersons.first().getName());
         status += "\nSorting " + sortedPersons.last().getName() + " == " + realm.allObjects(Person.class).first().getName();
 

@@ -101,7 +101,7 @@ public class GridViewExampleActivity extends Activity implements AdapterView.OnI
         }
 
         // GSON can parse the data.
-        // Note there is a bug in GSON 2.3.1 that can cause it to StackOverflow when working with RealmObjects.
+        // Note there is a bug in GSON 2.5 that can cause it to StackOverflow when working with RealmObjects.
         // To work around this, use the ExclusionStrategy below or downgrade to 1.7.1
         // See more here: https://code.google.com/p/google-gson/issues/detail?id=440
         Gson gson = new GsonBuilder()
@@ -144,7 +144,7 @@ public class GridViewExampleActivity extends Activity implements AdapterView.OnI
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
         City modifiedCity = (City)mAdapter.getItem(position);
 
-        // Acquire the list of realm cities matching the name of the clicked City.
+        // Acquire the RealmObject matching the name of the clicked City.
         City city = realm.where(City.class).equalTo("name", modifiedCity.getName()).findFirst();
 
         // Create a transaction to increment the vote count for the selected City in the realm
