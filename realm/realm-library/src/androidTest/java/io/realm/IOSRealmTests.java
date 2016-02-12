@@ -51,7 +51,7 @@ public class IOSRealmTests {
     @Rule
     public final TestRealmConfigurationFactory configFactory = new TestRealmConfigurationFactory();
 
-    private static final String[] IOS_VERSIONS = new String[] {"0.96.2"};
+    private static final String[] IOS_VERSIONS = new String[] {"0.98.1"};
     private static final String REALM_NAME = "alltypes.realm";
     private Realm realm;
     private Context context;
