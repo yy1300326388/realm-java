@@ -5,22 +5,22 @@ The databases are generated using the below iOS code.
 Note that debugging must be disabled as it is currently (02/10-2015) not possible to debug encrypted
 Realms in Xcode.
 
-HOWTO
+### HOWTO
 
-1) Checkout realm-cocoa
-2) Open ~/realm-cocoa/RealmExamples.xcodeproj in Xcode
-3) Replace /Simple/AppDelegate.m with the below code.
-4) Disable debugging. See below for how.
-5) Run Simple project.
-6) Copy/paste output Realm files into Java unit tests asset directory.
+1. Checkout realm-cocoa.
+2. Open ~/realm-cocoa/RealmExamples.xcodeproj in Xcode.
+3. Replace /Simple/AppDelegate.m with the below code.
+4. Disable debugging. See below for how.
+5. Run Simple project.
+6. Copy/paste output Realm files into Java unit tests asset directory.
 
-DISABLE DEBUGGING:
+### DISABLE DEBUGGING:
 
-1) Click on spinner that chooses which Example to run
-2) At the bottom should be a button called "Edit Scheme".
-3) Choose "Run" if not selected already.
-4) Remove check in "Debug executable".
-5) Save and run.
+1. Click on spinner that chooses which Example to run.
+2. At the bottom should be a button called "Edit Scheme".
+3. Choose "Run" if not selected already.
+4. Remove check in "Debug executable".
+5. Save and run.
 
 See the Log for where the output files are located.
 
