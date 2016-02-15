@@ -102,6 +102,10 @@ JNIEXPORT void JNICALL Java_io_realm_internal_TableView_nativeDistinctMulti(
             if (!COL_INDEX_VALID(env, TV(nativeViewPtr), indexes[i])) {
                 return;
             }
+            if (!TV(nativeViewPtr)->get_parent().has_search_index(S(indexes[i]))) {
+                ThrowException(env, IllegalArgument, "The field must be indexed before distinct() can be used.");
+                return;
+            }
             switch (TV(nativeViewPtr)->get_column_type(S(indexes[i]))) {
                 case type_Bool:
                 case type_Int:

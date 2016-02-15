@@ -812,7 +812,7 @@ public class TableView implements TableOrView, Closeable {
      * and then apply distinct() on that, invalidating previous distinct().
      *
      * @param columnIndexes the column indexes.
-     * @throws IllegalArgumentException if a column is unsupported type.
+     * @throws IllegalArgumentException if a column is unsupported type, or is not indexed.
      */
     public void distinct(long[] columnIndexes) {
         // Execute the disposal of abandoned realm objects each time a new realm object is created
