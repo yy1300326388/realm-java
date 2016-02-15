@@ -103,7 +103,7 @@ JNIEXPORT void JNICALL Java_io_realm_internal_TableView_nativeDistinctMulti(
                 return;
             }
             if (!TV(nativeViewPtr)->get_parent().has_search_index(S(indexes[i]))) {
-                ThrowException(env, IllegalArgument, "The field must be indexed before distinct() can be used.");
+                ThrowException(env, IllegalArgument, "The field must be indexed before distinct(...) can be used.");
                 return;
             }
             switch (TV(nativeViewPtr)->get_column_type(S(indexes[i]))) {
