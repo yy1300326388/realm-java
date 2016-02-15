@@ -1025,6 +1025,22 @@ public final class Realm extends BaseRealm {
     }
 
     /**
+     * Returns a distinct set of objects from a specific class that fulfill the multiple fields
+     * condition. If the result is sorted, the first object of a column will be returned in case of
+     * multiple occurrences, otherwise it is undefined which object is returned.
+     *
+     * @param clazz the Class to get objects of.
+     * @param fieldNames the multiple fields.
+     * @return a non-null {@link RealmResults} containing the distinct objects.
+     * @throws IllegalArgumentException if fieldNames is empty, or a field is null, does not exist,
+     * is an unsupported type, or points to a linked field.
+     */
+    public <E extends RealmObject> RealmResults<E> distinct(Class<E> clazz, String... fieldNames) {
+        checkIfValid();
+        return where(clazz).distinct(fieldNames);
+    }
+
+    /**
      * Executes a given transaction on the Realm. {@link #beginTransaction()} and {@link #commitTransaction()} will be
      * called automatically. If any exception is thrown during the transaction {@link #cancelTransaction()} will be
      * called instead of {@link #commitTransaction()}.

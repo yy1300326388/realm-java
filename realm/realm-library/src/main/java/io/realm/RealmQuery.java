@@ -1228,6 +1228,45 @@ public class RealmQuery<E extends RealmObject> {
         return columnIndex;
     }
 
+    /**
+     * Returns a distinct set of objects from a specific class that fulfill the multiple fields
+     * condition. If the result is sorted, the first object of a column will be returned in case of
+     * multiple occurrences, otherwise it is undefined which object is returned.
+     *
+     * @param fieldNames the multiple fields.
+     * @return a non-null {@link RealmResults} containing the distinct objects.
+     * @throws IllegalArgumentException if fieldNames is empty, or a field is null, does not exist,
+     * is an unsupported type, or points to a linked field.
+     */
+    public RealmResults<E> distinct(String... fieldNames) {
+        checkQueryIsNotReused();
+        long[] columnIndexes = getValidatedColumIndexes(this.table.getTable(), fieldNames);
+        TableView tableView = this.query.findAll();
+        tableView.distinct(columnIndexes);
+
+        RealmResults<E> realmResults;
+        if (isDynamicQuery()) {
+            realmResults =  (RealmResults<E>) RealmResults.createFromDynamicTableOrView(realm, tableView, className);
+        } else {
+            realmResults = RealmResults.createFromTableOrView(realm, tableView, clazz);
+        }
+        return realmResults;
+    }
+
+    // find and validate the column indices of fields for building a distinctive TableView with multi-args
+    static long[] getValidatedColumIndexes(Table table, String... fieldNames) {
+        // check if fieldNames is empty
+        if (fieldNames.length == 0) {
+            throw new IllegalArgumentException("At least one field name must be specified.");
+        }
+        // build an array of column index from field names
+        long[] columnIndexes = new long[fieldNames.length];
+        for (int i = 0; i < fieldNames.length; i++){
+            columnIndexes[i] = getAndValidateDistinctColumnIndex(fieldNames[i], table);
+        }
+        return columnIndexes;
+    }
+
     // Aggregates
 
     // Sum
