@@ -78,60 +78,8 @@ RLM_ARRAY_TYPE(AllTypes)
 
 @implementation AppDelegate
 
-int64_t realm_from_nsdate(CFAbsoluteTime nsdate) {
-    return static_cast<int64_t>(nsdate);
-}
-
-CFAbsoluteTime nsdate_from_realm(int64_t realm_date) {
-    return static_cast<CFAbsoluteTime>(realm_date);
-}
-
-CFAbsoluteTime brute_force_estimation_max_date() {
-    CFAbsoluteTime est_max = DBL_MAX;
-    while (true) {
-        CFAbsoluteTime checker = nsdate_from_realm(realm_from_nsdate(est_max));
-        if (checker == est_max) {
-            int64_t est_fine = realm_from_nsdate(est_max);
-            while (true) {
-                int64_t fine_checker = realm_from_nsdate(nsdate_from_realm(est_fine));
-                if (fine_checker != est_fine) {
-                    --est_fine;
-                    CFAbsoluteTime date = nsdate_from_realm(est_fine);
-                    printf("[FINAL MAX BOUNDARY DATE THAT CAN BE SAFELY CONVERTED int64_t[0x%llx] NSTimeInterval(%.5e)]\n", est_fine, date);
-                    return date;
-                } else {
-                    ++est_fine;
-                }
-            }
-            break;
-        } else {
-            est_max /= 1e1;
-        }
-    }
-}
-
-CFAbsoluteTime brute_force_estimation_min_date() {
-    CFAbsoluteTime est_max = -DBL_MAX;
-    while (true) {
-        CFAbsoluteTime checker = nsdate_from_realm(realm_from_nsdate(est_max));
-        if (checker == est_max) {
-            int64_t est_fine = realm_from_nsdate(est_max);
-            while (true) {
-                int64_t fine_checker = realm_from_nsdate(nsdate_from_realm(est_fine));
-                if (fine_checker != est_fine) {
-                    ++est_fine;
-                    CFAbsoluteTime date = nsdate_from_realm(est_fine);
-                    printf("[FINAL MIN BOUNDARY DATE THAT CAN BE SAFELY CONVERTED int64_t[0x%llx] NSTimeInterval(%.5e)]\n", est_fine,date);
-                    return date;
-                } else {
-                    --est_fine;
-                }
-            }
-            break;
-        } else {
-            est_max /= 1e1;
-        }
-    }
++ (int64_t) realm_from_nsdate:(NSDate *)nsdate {
+    return static_cast<int64_t>([nsdate timeIntervalSince1970]);
 }
 
 + (NSString *)getRealmFilePath:(NSString *)realmName {
@@ -204,7 +152,7 @@ CFAbsoluteTime brute_force_estimation_min_date() {
     obj.doubleCol = -DBL_MAX;
     obj.byteCol = [NSData dataWithBytes:no_bytes length:sizeof(no_bytes)];
     obj.stringCol = @"";
-    obj.dateCol = [NSDate dateWithTimeIntervalSinceReferenceDate: (NSTimeInterval) brute_force_estimation_min_date()];
+    obj.dateCol = [NSDate dateWithTimeIntervalSinceReferenceDate:-DBL_MIN];
     [realm addObject:obj];
     [realm commitWriteTransaction];
 
@@ -219,7 +167,7 @@ CFAbsoluteTime brute_force_estimation_min_date() {
     obj.doubleCol = DBL_MAX;
     obj.byteCol = [NSData dataWithBytes:no_bytes length:sizeof(no_bytes)];
     obj.stringCol = @"";
-    obj.dateCol = [NSDate dateWithTimeIntervalSinceReferenceDate: (NSTimeInterval) brute_force_estimation_max_date()];
+    obj.dateCol = [NSDate dateWithTimeIntervalSinceReferenceDate:DBL_MAX];
     [realm addObject:obj];
     [realm commitWriteTransaction];
 
