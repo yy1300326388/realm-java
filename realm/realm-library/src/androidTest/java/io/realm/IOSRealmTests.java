@@ -51,7 +51,7 @@ public class IOSRealmTests {
     @Rule
     public final TestRealmConfigurationFactory configFactory = new TestRealmConfigurationFactory();
 
-    private static final String[] IOS_VERSIONS = new String[] {"0.98.1"};
+    private static final String[] IOS_VERSIONS = new String[] {"0.98.0"};
     private static final String REALM_NAME = "alltypes.realm";
     private Realm realm;
     private Context context;
@@ -61,6 +61,12 @@ public class IOSRealmTests {
         RealmConfiguration defaultConfiguration = configFactory.createConfigurationBuilder()
                 .name(REALM_NAME)
                 .schema(IOSAllTypes.class, IOSChild.class)
+                .schemaVersion(1)
+                .migration(new RealmMigration(){
+                    @Override
+                    public void migrate(final DynamicRealm realm, long oldVersion, long newVersion) {
+                    }
+                })
                 .build();
         Realm.setDefaultConfiguration(defaultConfiguration);
         context = InstrumentationRegistry.getInstrumentation().getContext();

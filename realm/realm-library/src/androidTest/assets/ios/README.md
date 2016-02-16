@@ -27,7 +27,7 @@ See the Log for where the output files are located.
 ```objective-c  
 ////////////////////////////////////////////////////////////////////////////
 //
-// Copyright 2015 Realm Inc.
+// Copyright 2016 Realm Inc.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -78,9 +78,13 @@ RLM_ARRAY_TYPE(AllTypes)
 
 @implementation AppDelegate
 
-+ (RLMRealm *)appDefaultRealm:(NSString *) realmName {
++ (NSString *)getRealmFilePath:(NSString *)realmName {
     NSString *documentsDirectory = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES)objectAtIndex:0];
-    NSString* allTypesRealm = [documentsDirectory stringByAppendingPathComponent:realmName];
+    return [documentsDirectory stringByAppendingPathComponent:realmName];
+}
+
++ (RLMRealm *)appDefaultRealm:(NSString *) realmName {
+    NSString* allTypesRealm = [AppDelegate getRealmFilePath:realmName];
     [[NSFileManager defaultManager] removeItemAtPath:allTypesRealm error:nil];
     RLMRealm *realm = [RLMRealm realmWithPath:allTypesRealm];
     return realm;
@@ -170,7 +174,7 @@ RLM_ARRAY_TYPE(AllTypes)
     NSData *keyData = [[NSData alloc] initWithBytes:buffer length:sizeof(buffer)]; // Zerofilled byte array
     NSError *error;
     RLMRealmConfiguration *config = [RLMRealmConfiguration defaultConfiguration];
-    config.path = [NSString stringWithFormat:@"%@-alltypes-default-encrypted.realm", version];
+    config.path = [AppDelegate getRealmFilePath:[NSString stringWithFormat:@"%@-alltypes-default-encrypted.realm", version]];
     config.encryptionKey = keyData;
     config.readOnly = NO;
     realm = [RLMRealm realmWithConfiguration:config error:&error];
