@@ -1,9 +1,9 @@
 This folder contains various Realm databases created on iOS and can be used to test interop with
-Realm-Android.
+Realm-Android. The databases are generated using the below iOS code.
 
-The databases are generated using the below iOS code.
-Note that debugging must be disabled as it is currently (02/10-2015) not possible to debug encrypted
+(02/10-2015) Note that debugging must be disabled as it is currently not possible to debug encrypted
 Realms in Xcode.
+(02/17-2016) Note that we should match the core version (0.96.0) used in Cocoa (0.98.0) for Java (0.88).
 
 ### HOWTO
 
@@ -45,9 +45,11 @@ See the Log for where the output files are located.
 
 #import "AppDelegate.h"
 #import <Realm/Realm.h>
+#include <limits>
+using namespace std;
 
 @interface IOSChild : RLMObject
-@property NSString      *name;
+@property NSString *name;
 @end
 RLM_ARRAY_TYPE(IOSChild)
 
@@ -60,6 +62,7 @@ RLM_ARRAY_TYPE(IOSChild)
 @property short shortCol;
 @property int intCol;
 @property long longCol;
+@property int64_t longLongCol;
 @property float floatCol;
 @property double doubleCol;
 @property NSData *byteCol;
@@ -102,7 +105,7 @@ RLM_ARRAY_TYPE(AllTypes)
 
     NSLog(@"Documents Directory: %@", [[[NSFileManager defaultManager] URLsForDirectory:NSDocumentDirectory inDomains:NSUserDomainMask] lastObject]);
 
-    const NSString *version = @"0.98.1";
+    const NSString *version = @"0.98.0";
     const unsigned char no_bytes[] = {};
     const unsigned char bytes[] = {1,2,3};
 
@@ -115,6 +118,7 @@ RLM_ARRAY_TYPE(AllTypes)
         obj.shortCol = 1 + i;
         obj.intCol = 10 + i;
         obj.longCol = 100 + i;
+        obj.longLongCol = 100000000 + i;
         obj.floatCol = 1.23 + i;
         obj.doubleCol = 1.234 + i;
         obj.byteCol = [NSData dataWithBytes:bytes length:sizeof(bytes)];
@@ -148,13 +152,16 @@ RLM_ARRAY_TYPE(AllTypes)
     obj.shortCol = SHRT_MIN;
     obj.intCol = INT_MIN;
     obj.longCol = LONG_MIN;
+    obj.longLongCol = std::numeric_limits<int64_t>::min();
     obj.floatCol = -FLT_MAX;
     obj.doubleCol = -DBL_MAX;
     obj.byteCol = [NSData dataWithBytes:no_bytes length:sizeof(no_bytes)];
     obj.stringCol = @"";
-    obj.dateCol = [NSDate dateWithTimeIntervalSinceReferenceDate:-DBL_MIN];
+    obj.dateCol = [NSDate dateWithTimeIntervalSinceReferenceDate:-DBL_MAX];
     [realm addObject:obj];
     [realm commitWriteTransaction];
+    NSLog(@"%@, obj.longLongCol : 0x%llx\n",[NSString stringWithFormat:@"%@-alltypes-min.realm", version], obj.longLongCol);
+    NSLog(@"%@, obj.dateCol : 0x%llx\n",[NSString stringWithFormat:@"%@-alltypes-min.realm", version], [AppDelegate realm_from_nsdate:obj.dateCol]);
 
     realm = [AppDelegate appDefaultRealm:[NSString stringWithFormat:@"%@-alltypes-max.realm", version]];
     [realm beginWriteTransaction];
@@ -163,6 +170,7 @@ RLM_ARRAY_TYPE(AllTypes)
     obj.shortCol = SHRT_MAX;
     obj.intCol = INT_MAX;
     obj.longCol = LONG_MAX;
+    obj.longLongCol = std::numeric_limits<int64_t>::max();
     obj.floatCol = FLT_MAX;
     obj.doubleCol = DBL_MAX;
     obj.byteCol = [NSData dataWithBytes:no_bytes length:sizeof(no_bytes)];
@@ -170,6 +178,8 @@ RLM_ARRAY_TYPE(AllTypes)
     obj.dateCol = [NSDate dateWithTimeIntervalSinceReferenceDate:DBL_MAX];
     [realm addObject:obj];
     [realm commitWriteTransaction];
+    NSLog(@"%@, obj.longLongCol : 0x%llx\n",[NSString stringWithFormat:@"%@-alltypes-max.realm", version], obj.longLongCol);
+    NSLog(@"%@, obj.dateCol : 0x%llx\n",[NSString stringWithFormat:@"%@-alltypes-max.realm", version], [AppDelegate realm_from_nsdate:obj.dateCol]);
 
     uint8_t buffer[64];
     for (int i = 0; i < sizeof(buffer); i++) {
