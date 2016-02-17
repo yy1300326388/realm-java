@@ -2281,4 +2281,98 @@ public class RealmQueryTests {
         } catch (IllegalArgumentException ignored) {
         }
     }
+
+    @Test
+    public void distinctMultiArgs() {
+        final long numberOfBlocks = 25;
+        final long numberOfObjects = 10; // must be greater than 1
+        populateForDistinct(realm, numberOfBlocks, numberOfObjects, false);
+
+        RealmResults<AnnotationIndexTypes> distinctMulti = realm.where(AnnotationIndexTypes.class).distinct(AnnotationIndexTypes.FIELD_INDEX_BOOL, AnnotationIndexTypes.FIELD_INDEX_LONG, AnnotationIndexTypes.FIELD_INDEX_DATE, AnnotationIndexTypes.FIELD_INDEX_STRING);
+        assertEquals(numberOfBlocks, distinctMulti.size());
+    }
+
+    @Test
+    public void distinctMultiArgs_withNullValues() {
+        final long numberOfBlocks = 25;
+        final long numberOfObjects = 10;
+        populateForDistinct(realm, numberOfBlocks, numberOfObjects, true);
+
+        RealmResults<AnnotationIndexTypes> distinctMulti = realm.where(AnnotationIndexTypes.class).distinct(AnnotationIndexTypes.FIELD_INDEX_DATE, AnnotationIndexTypes.FIELD_INDEX_STRING);
+        assertEquals("distinctMulti", 1, distinctMulti.size());
+    }
+
+    @Test
+    public void distinctMultiArgs_notIndexedFields() {
+        final long numberOfBlocks = 25;
+        final long numberOfObjects = 10;
+        populateForDistinct(realm, numberOfBlocks, numberOfObjects, false);
+
+        try {
+            realm.where(AnnotationIndexTypes.class).distinct(AnnotationIndexTypes.FIELD_NOT_INDEX_DATE, AnnotationIndexTypes.FIELD_INDEX_STRING);
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    @Test
+    public void distinctMultiArgs_doesNotExist() {
+        final long numberOfBlocks = 25;
+        final long numberOfObjects = 10; // must be greater than 1
+        populateForDistinct(realm, numberOfBlocks, numberOfObjects, false);
+
+        try{
+            realm.where(AnnotationIndexTypes.class).distinct("doesNotExist", AnnotationIndexTypes.FIELD_INDEX_DATE);
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    @Test
+    public void distinctMultiArgs_invalidTypes() {
+        populateTestRealm();
+
+        try {
+            realm.where(AllTypes.class).distinct(AllTypes.FIELD_REALMOBJECT, AllTypes.FIELD_REALMLIST, AllTypes.FIELD_DOUBLE, AllTypes.FIELD_FLOAT);
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
+
+    @Test
+    public void distinctMultiArgs_indexedLinkedFields() {
+        final long numberOfBlocks = 25;
+        final long numberOfObjects = 10;
+        populateForDistinct(realm, numberOfBlocks, numberOfObjects, true);
+
+        for (String field : AnnotationIndexTypes.INDEX_FIELDS) {
+            try {
+                realm.where(AnnotationIndexTypes.class).distinct(AnnotationIndexTypes.FIELD_OBJECT + "." + field);
+                fail("Unsupported Index" + field + " linked field");
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+    }
+
+    @Test
+    public void distinctMultiArgs_notIndexedLinkedFields() {
+        final long numberOfBlocks = 25;
+        final long numberOfObjects = 10;
+        populateForDistinct(realm, numberOfBlocks, numberOfObjects, true);
+
+        for (String field : AnnotationIndexTypes.NOT_INDEX_FIELDS) {
+            try {
+                realm.where(AnnotationIndexTypes.class).distinct(AnnotationIndexTypes.FIELD_OBJECT + "." + field);
+                fail("Unsupported notIndex" + field + " linked field");
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+    }
+
+    @Test
+    public void distinctMultiArgs_invalidTypesLinkedFields() {
+        populateForDistinctInvalidTypesLinked(realm);
+
+        try{
+            realm.where(AllJavaTypes.class).distinct(AllJavaTypes.FIELD_OBJECT + "." + AllJavaTypes.FIELD_BINARY);
+        } catch (IllegalArgumentException ignored) {
+        }
+    }
 }
