@@ -3,7 +3,7 @@ Realm-Android. The databases are generated using the below iOS code.
 
 (02/10-2015) Note that debugging must be disabled as it is currently not possible to debug encrypted
 Realms in Xcode.
-(02/17-2016) Note that we should match the core version (0.96.0) used in Cocoa (0.98.0) for Java (0.88).
+(02/17-2016) Note that we should match the core version (0.96.0) used in Cocoa (0.98.0) for Java (0.87.4).
 
 ### HOWTO
 
