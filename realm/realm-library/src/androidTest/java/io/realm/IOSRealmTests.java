@@ -39,7 +39,6 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 
-
 import static io.realm.internal.test.ExtraTests.assertArrayEquals;
 
 /**
@@ -61,12 +60,7 @@ public class IOSRealmTests {
         RealmConfiguration defaultConfiguration = configFactory.createConfigurationBuilder()
                 .name(REALM_NAME)
                 .schema(IOSAllTypes.class, IOSChild.class)
-                .schemaVersion(1)
-                .migration(new RealmMigration(){
-                    @Override
-                    public void migrate(final DynamicRealm realm, long oldVersion, long newVersion) {
-                    }
-                })
+                .deleteRealmIfMigrationNeeded()
                 .build();
         Realm.setDefaultConfiguration(defaultConfiguration);
         context = InstrumentationRegistry.getInstrumentation().getContext();
